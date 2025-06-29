@@ -6,6 +6,7 @@ import '../providers/auth_provider.dart';
 import '../providers/task_provider.dart';
 import '../providers/achievement_provider.dart';
 import '../providers/project_provider.dart';
+import '../providers/team_provider.dart';
 import '../widgets/common/glass_card.dart';
 import '../widgets/common/stat_card.dart';
 import '../widgets/common/progress_bar.dart';
@@ -17,6 +18,7 @@ import 'projects_screen.dart';
 import 'achievements_screen.dart';
 import 'notifications_screen.dart';
 import 'settings_screen.dart';
+import 'teams_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -39,6 +41,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       context.read<TaskProvider>().loadTasks(),
       context.read<AchievementProvider>().loadAchievements(),
       context.read<ProjectProvider>().loadProjects(),
+      context.read<TeamProvider>().loadTeams(),
     ]);
   }
 
@@ -165,6 +168,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     
                     // Stats Overview
                     _buildStatsSection(),
+                    const SizedBox(height: AppSizes.paddingMd),
+                    
+                    // My Teams
+                    _buildMyTeamsSection(),
                     const SizedBox(height: AppSizes.paddingMd),
                     
                     // Recent Tasks
@@ -538,6 +545,182 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildMyTeamsSection() {
+    return Consumer<TeamProvider>(
+      builder: (context, teamProvider, child) {
+        final myTeams = teamProvider.myTeams.take(3).toList(); // Show max 3 teams
+
+        return GlassCard(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSizes.paddingMd),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'My Teams',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const TeamsScreen()),
+                        );
+                      },
+                      child: const Text(
+                        'View All',
+                        style: TextStyle(color: AppColors.success),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSizes.paddingMd),
+                if (myTeams.isEmpty)
+                  Center(
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.group_outlined,
+                          size: 48,
+                          color: AppColors.textSecondary.withValues(alpha: 0.5),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'No teams yet',
+                          style: TextStyle(
+                            color: AppColors.textSecondary.withValues(alpha: 0.7),
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const TeamsScreen()),
+                            );
+                          },
+                          icon: const Icon(Icons.add, size: 16),
+                          label: const Text('Create Team'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.success,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  Column(
+                    children: [
+                      ...myTeams.map((team) => _buildTeamCard(team)),
+                      if (teamProvider.myTeams.length > 3)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            '+${teamProvider.myTeams.length - 3} more teams',
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTeamCard(team) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TeamsScreen(),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.cardBackground.withValues(alpha: 0.3),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: AppColors.textSecondary.withValues(alpha: 0.2),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: AppColors.orangeGradient,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.group,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      team.name,
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                    Text(
+                      '${team.memberCount} members',
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: AppColors.textSecondary.withValues(alpha: 0.5),
+                size: 16,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
