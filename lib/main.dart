@@ -8,8 +8,9 @@ import 'providers/auth_provider.dart';
 import 'providers/task_provider.dart';
 import 'providers/achievement_provider.dart';
 import 'providers/project_provider.dart';
-import 'providers/notification_provider.dart';
+import 'providers/team_provider.dart';
 import 'services/env_config.dart';
+import 'services/webhook_service.dart';
 import 'screens/main_layout.dart';
 import 'screens/auth/splash_screen.dart';
 
@@ -18,6 +19,9 @@ void main() async {
   
   // Initialize environment configuration
   await EnvConfig.init();
+  
+  // Initialize webhook defaults
+  await WebhookService.initializeDefaults();
   
   // Set system UI overlay style
   SystemChrome.setSystemUIOverlayStyle(
@@ -50,7 +54,7 @@ class ZentryApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TaskProvider()),
         ChangeNotifierProvider(create: (_) => AchievementProvider()),
         ChangeNotifierProvider(create: (_) => ProjectProvider()),
-        ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(create: (_) => TeamProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
