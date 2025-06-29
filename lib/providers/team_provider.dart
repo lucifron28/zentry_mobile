@@ -175,6 +175,39 @@ class TeamProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> deleteTeam(String teamId) async {
+    try {
+      final success = await _teamService.deleteTeam(teamId);
+      
+      if (success) {
+        _teams.removeWhere((team) => team.id == teamId);
+        if (_currentTeam?.id == teamId) {
+          _currentTeam = null;
+        }
+        notifyListeners();
+        
+        // Send webhook notification
+        WebhookService.sendTeamDeleted(
+          teamId: teamId,
+          teamName: _teams.firstWhere((t) => t.id == teamId, 
+              orElse: () => Team(
+                id: teamId, 
+                name: 'Unknown Team', 
+                description: '', 
+                type: TeamType.project, 
+                createdAt: DateTime.now(),
+                members: [],
+              )).name,
+        );
+      }
+      
+      return success;
+    } catch (e) {
+      _setError('Failed to delete team: $e');
+      return false;
+    }
+  }
+
   // Team Selection
   void setCurrentTeam(Team? team) {
     _currentTeam = team;
