@@ -22,10 +22,44 @@ class AuthProvider extends ChangeNotifier {
 
   AuthProvider() {
     _loadUserData();
+    _initializeMockUser(); // Initialize mock user for demo
   }
 
   Future<void> init() async {
     await _loadUserData();
+    await _initializeMockUser();
+  }
+
+  Future<void> _initializeMockUser() async {
+    // Initialize mock user data for demo purposes
+    if (_user == null) {
+      _user = User(
+        id: 'demo-user-001',
+        email: 'ron.cada@example.com',
+        firstName: 'Ron Vincent',
+        lastName: 'Cada',
+        avatar: null,
+        xp: 2850,
+        level: 12,
+        currentStreak: 7,
+        longestStreak: 15,
+        lastActivity: DateTime.now(),
+        createdAt: DateTime.now().subtract(const Duration(days: 45)),
+        updatedAt: DateTime.now(),
+        isEmailVerified: true,
+        preferences: {
+          'notifications': true,
+          'darkMode': true,
+          'defaultTaskDuration': 30,
+          'weekStartDay': 'monday',
+          'theme': 'dark',
+          'language': 'en',
+          'timezone': 'UTC',
+        },
+      );
+      _token = 'demo-token-12345';
+      notifyListeners();
+    }
   }
 
   Future<void> _loadUserData() async {
