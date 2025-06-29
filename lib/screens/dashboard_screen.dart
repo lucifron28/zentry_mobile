@@ -627,14 +627,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       _navigateToScreen(1); // Navigate to tasks screen
                     },
                     onToggleComplete: () async {
-                      final success = await taskProvider.completeTask(task.id);
+                      final success = await taskProvider.toggleTaskCompletion(task.id);
                       if (mounted && context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
                               success 
-                                ? 'Task completed! +${task.xpReward} XP'
-                                : 'Failed to complete task',
+                                ? task.isCompleted 
+                                  ? 'Task marked as pending'
+                                  : 'Task completed! +${task.xpReward} XP'
+                                : 'Failed to update task',
                             ),
                             backgroundColor: success ? AppColors.success : AppColors.danger,
                             duration: const Duration(seconds: 2),
