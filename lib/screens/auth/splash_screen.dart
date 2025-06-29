@@ -89,10 +89,10 @@ class _SplashScreenState extends State<SplashScreen>
                       width: 120,
                       height: 120,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withAlpha((0.1 * 255).toInt()),
                         borderRadius: BorderRadius.circular(30),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.3),
+                          color: Colors.white.withAlpha((0.3 * 255).toInt()),
                           width: 2,
                         ),
                       ),
@@ -130,7 +130,7 @@ class _SplashScreenState extends State<SplashScreen>
                           Text(
                             'Gamify Your Productivity',
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: Colors.white.withOpacity(0.8),
+                              color: Colors.white.withAlpha((0.8 * 255).toInt()),
                               letterSpacing: 1,
                             ),
                           ),

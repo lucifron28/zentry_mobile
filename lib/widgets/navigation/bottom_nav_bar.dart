@@ -18,10 +18,10 @@ class CustomBottomNavBar extends StatelessWidget {
     return Container(
       height: 80,
       decoration: BoxDecoration(
-        color: AppColors.cardBackground.withOpacity(0.9),
+        color: AppColors.cardBackground.withValues(alpha: 0.9),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),

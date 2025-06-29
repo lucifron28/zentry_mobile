@@ -116,13 +116,13 @@ class _GradientButtonState extends State<GradientButton>
                   end: Alignment.bottomRight,
                   colors: widget.enabled 
                       ? widget.gradient 
-                      : widget.gradient.map((c) => c.withOpacity(0.5)).toList(),
+                      : widget.gradient.map((c) => c.withValues(alpha: 0.5)).toList(),
                 ),
                 borderRadius: effectiveBorderRadius,
                 boxShadow: widget.enabled && !widget.isLoading
                     ? [
                         BoxShadow(
-                          color: widget.gradient.first.withOpacity(0.3),
+                          color: widget.gradient.first.withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
@@ -281,7 +281,7 @@ class _OutlineGradientButtonState extends State<OutlineGradientButton>
                     ? LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: widget.gradient.map((c) => c.withOpacity(0.1)).toList(),
+                        colors: widget.gradient.map((c) => c.withValues(alpha: 0.1)).toList(),
                       )
                     : null,
                 borderRadius: effectiveBorderRadius,
@@ -429,13 +429,13 @@ class _IconGradientButtonState extends State<IconGradientButton>
                   end: Alignment.bottomRight,
                   colors: widget.enabled 
                       ? widget.gradient 
-                      : widget.gradient.map((c) => c.withOpacity(0.5)).toList(),
+                      : widget.gradient.map((c) => c.withValues(alpha: 0.5)).toList(),
                 ),
                 borderRadius: effectiveBorderRadius,
                 boxShadow: widget.enabled && !widget.isLoading
                     ? [
                         BoxShadow(
-                          color: widget.gradient.first.withOpacity(0.3),
+                          color: widget.gradient.first.withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),

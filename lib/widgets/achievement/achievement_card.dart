@@ -128,7 +128,7 @@ class AchievementCard extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: statusColor.withOpacity(0.2),
+                            color: statusColor.withValues(alpha: .2),
                             borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                           ),
                           child: Text(
@@ -184,7 +184,7 @@ class AchievementCard extends StatelessWidget {
                       const SizedBox(height: AppSizes.paddingSm),
                       LinearProgressIndicator(
                         value: achievement.progressPercentage,
-                        backgroundColor: AppColors.border.withOpacity(0.3),
+                        backgroundColor: AppColors.border.withValues(alpha: 0.3),
                         valueColor: AlwaysStoppedAnimation(statusColor),
                         minHeight: 4,
                       ),
@@ -290,7 +290,7 @@ class AchievementGrid extends StatelessWidget {
             Icon(
               Icons.emoji_events,
               size: 64,
-              color: AppColors.textSecondary.withOpacity(0.5),
+              color: AppColors.textSecondary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: AppSizes.paddingMd),
             Text(

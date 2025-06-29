@@ -95,7 +95,7 @@ class _ProgressBarState extends State<ProgressBar>
         Container(
           height: widget.height,
           decoration: BoxDecoration(
-            color: widget.backgroundColor.withOpacity(0.3),
+            color: widget.backgroundColor.withValues(alpha: 0.3),
             borderRadius: widget.borderRadius ??
                 BorderRadius.circular(widget.height / 2),
           ),
@@ -135,7 +135,7 @@ class _ProgressBarState extends State<ProgressBar>
               Text(
                 '100%',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary.withOpacity(0.7),
+                  color: AppColors.textSecondary.withValues(alpha: 0.7),
                 ),
               ),
             ],

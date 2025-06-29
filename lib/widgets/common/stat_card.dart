@@ -37,7 +37,7 @@ class StatCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(AppSizes.paddingSm),
                   decoration: BoxDecoration(
-                    color: AppColors.textPrimary.withOpacity(0.1),
+                    color: AppColors.textPrimary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                   ),
                   child: Icon(
@@ -225,7 +225,7 @@ class CompactStatCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(AppSizes.paddingSm),
               decoration: BoxDecoration(
-                color: (color ?? AppColors.textPrimary).withOpacity(0.1),
+                color: (color ?? AppColors.textPrimary).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppSizes.radiusSm),
               ),
               child: Icon(
@@ -296,7 +296,7 @@ class ProgressStatCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(AppSizes.paddingSm),
                   decoration: BoxDecoration(
-                    color: AppColors.textPrimary.withOpacity(0.1),
+                    color: AppColors.textPrimary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                   ),
                   child: Icon(

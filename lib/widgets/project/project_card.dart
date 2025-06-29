@@ -200,7 +200,7 @@ class ProjectCard extends StatelessWidget {
         vertical: 4,
       ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
+        color: color.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(AppSizes.radiusSm),
       ),
       child: Row(
@@ -335,7 +335,7 @@ class ProjectGrid extends StatelessWidget {
             Icon(
               Icons.folder_open,
               size: 64,
-              color: AppColors.textSecondary.withOpacity(0.5),
+              color: AppColors.textSecondary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: AppSizes.paddingMd),
             Text(

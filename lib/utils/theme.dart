@@ -162,7 +162,7 @@ class AppTheme {
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return const Color(0xFFA855F7).withOpacity(0.3);
+            return const Color(0xFFA855F7).withValues(alpha: 0.3);
           }
           return AppColors.border;
         }),

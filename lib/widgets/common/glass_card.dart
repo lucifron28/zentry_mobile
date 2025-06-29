@@ -43,19 +43,19 @@ class GlassCard extends StatelessWidget {
                 ? LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: gradient!.map((color) => color.withOpacity(effectiveOpacity)).toList(),
+                    colors: gradient!.map((color) => color.withValues(alpha: effectiveOpacity)).toList(),
                   )
                 : LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      AppColors.cardBackground.withOpacity(effectiveOpacity),
-                      AppColors.secondaryBackground.withOpacity(effectiveOpacity * 0.8),
+                      AppColors.cardBackground.withValues(alpha: effectiveOpacity),
+                      AppColors.secondaryBackground.withValues(alpha: effectiveOpacity * 0.8),
                     ],
                   ),
             borderRadius: effectiveBorderRadius,
             border: Border.all(
-              color: AppColors.border.withOpacity(0.5),
+              color: AppColors.border.withValues(alpha: 0.5),
               width: 1,
             ),
           ),
@@ -71,8 +71,8 @@ class GlassCard extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           borderRadius: effectiveBorderRadius,
-          splashColor: AppColors.textPrimary.withOpacity(0.1),
-          highlightColor: AppColors.textPrimary.withOpacity(0.05),
+          splashColor: AppColors.textPrimary.withValues(alpha: 0.1),
+          highlightColor: AppColors.textPrimary.withValues(alpha: 0.05),
           child: cardContent,
         ),
       );

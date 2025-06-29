@@ -99,7 +99,7 @@ class TaskCard extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: priorityColor.withOpacity(0.2),
+                            color: priorityColor.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                           ),
                           child: Text(
@@ -285,7 +285,7 @@ class TaskList extends StatelessWidget {
             Icon(
               Icons.task_alt,
               size: 64,
-              color: AppColors.textSecondary.withOpacity(0.5),
+              color: AppColors.textSecondary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: AppSizes.paddingMd),
             Text(
