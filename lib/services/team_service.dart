@@ -232,6 +232,25 @@ class TeamService {
     return await removeMember(teamId: teamId, userId: userId);
   }
 
+  // Delete team (only admin can delete)
+  Future<bool> deleteTeam(String teamId) async {
+    final userId = await getCurrentUserId();
+    final teams = await _getAllTeams();
+    final team = teams.firstWhere((t) => t.id == teamId, 
+        orElse: () => throw Exception('Team not found'));
+    
+    // Check if user is admin
+    if (!team.isAdmin(userId)) {
+      throw Exception('Only team admins can delete the team');
+    }
+    
+    // Remove team from storage
+    teams.removeWhere((t) => t.id == teamId);
+    await _saveAllTeams(teams);
+    
+    return true;
+  }
+
   // Private helper methods
   Future<List<Team>> _getAllTeams() async {
     final prefs = await SharedPreferences.getInstance();
