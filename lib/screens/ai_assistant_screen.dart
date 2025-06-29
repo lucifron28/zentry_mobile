@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../utils/constants.dart';
 import '../widgets/common/glass_card.dart';
 import '../services/ai_service.dart';
+import '../services/env_config.dart';
 
 class AIAssistantScreen extends StatefulWidget {
   const AIAssistantScreen({super.key});
@@ -15,9 +16,6 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
   final ScrollController _scrollController = ScrollController();
   final List<ChatMessage> _messages = [];
   bool _isLoading = false;
-  
-  // Placeholder API key - to be replaced later
-  static const String _apiKeyPlaceholder = 'your_api_key_here';
 
   @override
   void initState() {
@@ -33,9 +31,13 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
   }
 
   void _addWelcomeMessage() {
+    final welcomeText = AIService.isConfigured
+        ? "Hello! I'm Zenturion, your AI productivity assistant powered by OpenAI. I'm here to help you manage tasks, organize projects, and achieve your goals through Zentry's gamified system. How can I help boost your productivity today?"
+        : "Hello! I'm Zenturion, your AI productivity assistant. I'm currently running in demo mode because the OpenAI API key isn't configured in your .env file. I can still help you with productivity tips and guidance! To unlock my full AI capabilities, please configure your OpenAI API key in the .env file. How can I assist you today?";
+        
     _messages.add(
       ChatMessage(
-        text: "Hello! I'm Zenturion, your AI productivity assistant. I'm here to help you manage tasks, projects, and achieve your goals. How can I assist you today?",
+        text: welcomeText,
         isUser: false,
         timestamp: DateTime.now(),
       ),
@@ -62,8 +64,26 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
     _scrollToBottom();
 
     try {
+      // Prepare conversation history for OpenAI (last 10 messages to keep context manageable)
+      final conversationHistory = <Map<String, String>>[];
+      final recentMessages = _messages.length > 10 
+          ? _messages.sublist(_messages.length - 10)
+          : _messages;
+      
+      for (final msg in recentMessages) {
+        if (msg != _messages.last) { // Exclude the message we just added
+          conversationHistory.add({
+            'role': msg.isUser ? 'user' : 'assistant',
+            'content': msg.text,
+          });
+        }
+      }
+      
       // Use AI service for response
-      String aiResponse = await AIService.sendMessage(userMessage);
+      String aiResponse = await AIService.sendMessage(
+        userMessage,
+        conversationHistory: conversationHistory,
+      );
       
       setState(() {
         _messages.add(
@@ -76,13 +96,24 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      // Fallback to placeholder response if service fails
-      String aiResponse = _generatePlaceholderResponse(userMessage);
+      String errorMessage;
+      if (e.toString().contains('Invalid OpenAI API key')) {
+        errorMessage = "🔑 I need an OpenAI API key to access my full capabilities. For now, I'm running in demo mode!";
+      } else if (e.toString().contains('rate limit')) {
+        errorMessage = "⏰ I'm getting too many requests right now. Please wait a moment and try again!";
+      } else if (e.toString().contains('No internet')) {
+        errorMessage = "📶 It looks like you're offline. Please check your internet connection and try again!";
+      } else {
+        errorMessage = "🤖 I'm having a small technical hiccup, but I'm still here to help in demo mode!";
+      }
+      
+      // Generate fallback response
+      String fallbackResponse = _generatePlaceholderResponse(userMessage);
       
       setState(() {
         _messages.add(
           ChatMessage(
-            text: "Sorry, I'm having trouble connecting to my AI brain right now. Here's what I can tell you: $aiResponse",
+            text: "$errorMessage\n\n$fallbackResponse",
             isUser: false,
             timestamp: DateTime.now(),
           ),
@@ -455,7 +486,51 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'To connect to a real AI service:',
+              'Environment Configuration Status',
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(
+                  EnvConfig.isInitialized ? Icons.check_circle : Icons.error,
+                  color: EnvConfig.isInitialized ? AppColors.success : AppColors.danger,
+                  size: 16,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Environment: ${EnvConfig.isInitialized ? "Loaded" : "Failed to Load"}',
+                  style: TextStyle(
+                    color: EnvConfig.isInitialized ? AppColors.success : AppColors.danger,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(
+                  AIService.isConfigured ? Icons.check_circle : Icons.error,
+                  color: AIService.isConfigured ? AppColors.success : AppColors.danger,
+                  size: 16,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'OpenAI: ${AIService.isConfigured ? "Configured" : "Not Configured"}',
+                  style: TextStyle(
+                    color: AIService.isConfigured ? AppColors.success : AppColors.danger,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'To enable full OpenAI integration:',
               style: TextStyle(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.w600,
@@ -463,11 +538,16 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              '1. Replace the API key placeholder in AIService\n'
-              '2. Update the base URL for your AI provider\n'
-              '3. Implement the HTTP client integration\n'
-              '4. Configure authentication headers\n\n'
-              'For now, Zenturion uses smart placeholder responses to help you get started!',
+              '1. Get an OpenAI API key from platform.openai.com\n'
+              '2. Copy .env.example to .env in the project root\n'
+              '3. Replace OPENAI_API_KEY value with your actual key\n'
+              '4. Restart the app to load the new configuration\n'
+              '5. Ensure you have API credits in your OpenAI account\n\n'
+              '💡 Current model: ${EnvConfig.openAIModel}\n'
+              '🎛️ Max tokens: ${EnvConfig.openAIMaxTokens}\n'
+              '🌡️ Temperature: ${EnvConfig.openAITemperature}\n'
+              '💰 Estimated cost: ~\$0.002 per conversation\n\n'
+              'Demo mode provides smart responses without API calls!',
               style: TextStyle(color: AppColors.textSecondary),
             ),
           ],

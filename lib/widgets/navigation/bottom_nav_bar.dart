@@ -29,22 +29,26 @@ class CustomBottomNavBar extends StatelessWidget {
       ),
       child: SafeArea(
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.spaceAround, // Changed from spaceEvenly to spaceAround for better spacing
           children: items.asMap().entries.map((entry) {
             final index = entry.key;
             final item = entry.value;
             final isSelected = index == currentIndex;
+            final isAI = item.label == 'AI Assistant'; // Special handling for AI button
 
-            return Expanded(
+            return Flexible( // Changed from Expanded to Flexible
               child: GestureDetector(
                 onTap: () => onTap(index),
                 child: AnimatedContainer(
                   duration: AppConstants.shortAnimation,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSizes.paddingSm,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isAI ? AppSizes.paddingSm : AppSizes.paddingXs, // More padding for AI
                     vertical: AppSizes.paddingSm,
                   ),
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  margin: EdgeInsets.symmetric(
+                    horizontal: isAI ? 4 : 2, // More margin for AI
+                    vertical: isAI ? 4 : 8, // Less vertical margin for AI to make it bigger
+                  ),
                   decoration: BoxDecoration(
                     gradient: isSelected
                         ? const LinearGradient(
@@ -52,8 +56,23 @@ class CustomBottomNavBar extends StatelessWidget {
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           )
+                        : isAI && !isSelected
+                            ? LinearGradient(
+                                colors: [
+                                  AppColors.purpleGradient.first.withValues(alpha: 0.2),
+                                  AppColors.purpleGradient.last.withValues(alpha: 0.2),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              )
+                            : null,
+                    borderRadius: BorderRadius.circular(isAI ? AppSizes.radiusLg : AppSizes.radiusMd),
+                    border: isAI && !isSelected
+                        ? Border.all(
+                            color: AppColors.purpleGradient.first.withValues(alpha: 0.3),
+                            width: 1,
+                          )
                         : null,
-                    borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -65,20 +84,24 @@ class CustomBottomNavBar extends StatelessWidget {
                           key: ValueKey(isSelected),
                           color: isSelected
                               ? Colors.white
-                              : AppColors.textSecondary,
-                          size: AppSizes.iconMd,
+                              : isAI
+                                  ? AppColors.purpleGradient.first
+                                  : AppColors.textSecondary,
+                          size: isAI ? AppSizes.iconMd : AppSizes.iconSm, // Larger icon for AI
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: isAI ? 4 : 2), // More spacing for AI
                       Flexible(
                         child: Text(
                           item.label,
                           style: TextStyle(
                             color: isSelected
                                 ? Colors.white
-                                : AppColors.textSecondary,
-                            fontSize: 10,
-                            fontWeight: isSelected
+                                : isAI
+                                    ? AppColors.purpleGradient.first
+                                    : AppColors.textSecondary,
+                            fontSize: isAI ? 10 : 9, // Larger font for AI
+                            fontWeight: isSelected || isAI
                                 ? FontWeight.w600
                                 : FontWeight.w400,
                           ),
@@ -126,6 +149,12 @@ class AppBottomNavItems {
       activeIcon: Icons.task,
       label: 'Tasks',
       route: '/tasks',
+    ),
+    BottomNavItem(
+      icon: Icons.psychology_outlined,
+      activeIcon: Icons.psychology,
+      label: 'AI Assistant',
+      route: '/ai-assistant',
     ),
     BottomNavItem(
       icon: Icons.folder_outlined,

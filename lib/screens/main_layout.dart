@@ -3,6 +3,7 @@ import '../utils/constants.dart';
 import '../widgets/navigation/bottom_nav_bar.dart';
 import 'dashboard_screen.dart';
 import 'tasks_screen.dart';
+import 'ai_assistant_screen.dart';
 import 'projects_screen.dart';
 import 'achievements_screen.dart';
 import 'profile_screen.dart';
@@ -21,6 +22,7 @@ class _MainLayoutState extends State<MainLayout> {
   final List<Widget> _screens = [
     const DashboardScreen(),
     const TasksScreen(),
+    const AIAssistantScreen(),
     const ProjectsScreen(),
     const AchievementsScreen(),
     const ProfileScreen(),
