@@ -39,13 +39,30 @@ class AIService {
   static Future<String> sendMessage(String message, {
     List<Map<String, String>>? conversationHistory,
   }) async {
+    // Debug logging
+    if (EnvConfig.debugMode) {
+      print('🔧 AIService.sendMessage called');
+      print('🔧 isConfigured: $isConfigured');
+      print('🔧 API Key length: ${_apiKey.length}');
+      print('🔧 API Key starts with sk-: ${_apiKey.startsWith('sk-')}');
+      print('🔧 Model: $_model');
+      print('🔧 Max tokens: $_maxTokens');
+    }
+    
     if (!isConfigured) {
+      if (EnvConfig.debugMode) {
+        print('⚠️ AI Service not configured, using placeholder response');
+      }
       // Fallback to placeholder response if not configured
       await Future.delayed(const Duration(seconds: 1));
       return _generatePlaceholderResponse(message);
     }
     
     try {
+      if (EnvConfig.debugMode) {
+        print('🚀 Making OpenAI API request...');
+      }
+      
       // Prepare conversation messages for OpenAI
       final List<Map<String, String>> messages = [
         {
@@ -65,6 +82,20 @@ class AIService {
         'content': message,
       });
       
+      final requestBody = {
+        'model': _model,
+        'messages': messages,
+        'max_tokens': _maxTokens, // From environment config
+        'temperature': _temperature, // From environment config
+        'top_p': 1.0,
+        'frequency_penalty': 0.0,
+        'presence_penalty': 0.0,
+      };
+      
+      if (EnvConfig.debugMode) {
+        print('🔧 Request body: ${json.encode(requestBody)}');
+      }
+      
       // Make API call to OpenAI
       final response = await http.post(
         Uri.parse('$_baseUrl/chat/completions'),
@@ -72,18 +103,15 @@ class AIService {
           'Authorization': 'Bearer $_apiKey',
           'Content-Type': 'application/json',
         },
-        body: json.encode({
-          'model': _model,
-          'messages': messages,
-          'max_tokens': _maxTokens, // From environment config
-          'temperature': _temperature, // From environment config
-          'top_p': 1.0,
-          'frequency_penalty': 0.0,
-          'presence_penalty': 0.0,
-        }),
+        body: json.encode(requestBody),
       ).timeout(
         const Duration(seconds: 30), // 30-second timeout
       );
+      
+      if (EnvConfig.debugMode) {
+        print('🔧 Response status: ${response.statusCode}');
+        print('🔧 Response body: ${response.body}');
+      }
       
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -96,7 +124,7 @@ class AIService {
       } else if (response.statusCode == 500) {
         throw Exception('OpenAI service is currently unavailable. Please try again later.');
       } else {
-        throw Exception('Failed to get AI response: ${response.statusCode}');
+        throw Exception('Failed to get AI response: ${response.statusCode} - ${response.body}');
       }
     } on SocketException {
       throw Exception('No internet connection. Please check your network.');

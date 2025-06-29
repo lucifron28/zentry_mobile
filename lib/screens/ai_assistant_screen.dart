@@ -16,6 +16,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
   final ScrollController _scrollController = ScrollController();
   final List<ChatMessage> _messages = [];
   bool _isLoading = false;
+  bool _showDebugInfo = false;
 
   @override
   void initState() {
@@ -31,9 +32,13 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
   }
 
   void _addWelcomeMessage() {
-    final welcomeText = AIService.isConfigured
+    // Debug information
+    final debugInfo = _getDebugInfo();
+    final isConfigured = AIService.isConfigured;
+    
+    final welcomeText = isConfigured
         ? "Hello! I'm Zenturion, your AI productivity assistant powered by OpenAI. I'm here to help you manage tasks, organize projects, and achieve your goals through Zentry's gamified system. How can I help boost your productivity today?"
-        : "Hello! I'm Zenturion, your AI productivity assistant. I'm currently running in demo mode because the OpenAI API key isn't configured in your .env file. I can still help you with productivity tips and guidance! To unlock my full AI capabilities, please configure your OpenAI API key in the .env file. How can I assist you today?";
+        : "Hello! I'm Zenturion, your AI productivity assistant. I'm currently running in demo mode because the OpenAI API key isn't configured properly. I can still help you with productivity tips and guidance! To unlock my full AI capabilities, please check the debug information below. How can I assist you today?";
         
     _messages.add(
       ChatMessage(
@@ -42,6 +47,43 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
         timestamp: DateTime.now(),
       ),
     );
+    
+    // Add debug message if not configured or in debug mode
+    if (!isConfigured || EnvConfig.debugMode) {
+      _messages.add(
+        ChatMessage(
+          text: "🔧 DEBUG INFO:\n$debugInfo",
+          isUser: false,
+          timestamp: DateTime.now(),
+        ),
+      );
+    }
+  }
+  
+  String _getDebugInfo() {
+    final apiKey = EnvConfig.openAIApiKey;
+    final hasValidKey = apiKey.isNotEmpty && 
+                       apiKey != 'your_openai_api_key_here' && 
+                       apiKey.startsWith('sk-');
+    
+    return """
+Environment Status:
+• Initialized: ${EnvConfig.isInitialized ? '✅' : '❌'}
+• Debug Mode: ${EnvConfig.debugMode ? '✅' : '❌'}
+
+OpenAI Configuration:
+• API Key Present: ${hasValidKey ? '✅' : '❌'}
+• API Key Length: ${apiKey.length} characters
+• API Key Prefix: ${apiKey.length > 10 ? apiKey.substring(0, 10) + '...' : apiKey}
+• Model: ${EnvConfig.openAIModel}
+• Max Tokens: ${EnvConfig.openAIMaxTokens}
+• Temperature: ${EnvConfig.openAITemperature}
+
+Service Status:
+• AI Service Configured: ${AIService.isConfigured ? '✅' : '❌'}
+
+Note: If you just updated the .env file, please completely restart the app (not hot reload) for changes to take effect.
+""";
   }
 
   void _sendMessage() async {
@@ -64,6 +106,13 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
     _scrollToBottom();
 
     try {
+      // Debug: Log the attempt
+      if (EnvConfig.debugMode) {
+        print('🚀 Sending message to AI: $userMessage');
+        print('🔧 AI Service configured: ${AIService.isConfigured}');
+        print('🔑 API Key configured: ${EnvConfig.openAIApiKey.startsWith('sk-')}');
+      }
+      
       // Prepare conversation history for OpenAI (last 10 messages to keep context manageable)
       final conversationHistory = <Map<String, String>>[];
       final recentMessages = _messages.length > 10 
@@ -85,6 +134,10 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
         conversationHistory: conversationHistory,
       );
       
+      if (EnvConfig.debugMode) {
+        print('✅ AI Response received: ${aiResponse.substring(0, aiResponse.length > 50 ? 50 : aiResponse.length)}...');
+      }
+      
       setState(() {
         _messages.add(
           ChatMessage(
@@ -96,15 +149,21 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
         _isLoading = false;
       });
     } catch (e) {
+      if (EnvConfig.debugMode) {
+        print('❌ AI Error: $e');
+      }
+      
       String errorMessage;
       if (e.toString().contains('Invalid OpenAI API key')) {
-        errorMessage = "🔑 I need an OpenAI API key to access my full capabilities. For now, I'm running in demo mode!";
+        errorMessage = "🔑 I need a valid OpenAI API key to access my full capabilities. Please check your .env file configuration!";
       } else if (e.toString().contains('rate limit')) {
         errorMessage = "⏰ I'm getting too many requests right now. Please wait a moment and try again!";
-      } else if (e.toString().contains('No internet')) {
+      } else if (e.toString().contains('No internet') || e.toString().contains('SocketException')) {
         errorMessage = "📶 It looks like you're offline. Please check your internet connection and try again!";
+      } else if (e.toString().contains('TimeoutException')) {
+        errorMessage = "⏱️ The request took too long. Please try again!";
       } else {
-        errorMessage = "🤖 I'm having a small technical hiccup, but I'm still here to help in demo mode!";
+        errorMessage = "🤖 I'm having a technical issue: ${e.toString()}";
       }
       
       // Generate fallback response
@@ -208,17 +267,22 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
                   ),
                   IconButton(
                     onPressed: () {
-                      // Show info about API key placeholder
-                      _showApiKeyInfo();
+                      setState(() {
+                        _showDebugInfo = !_showDebugInfo;
+                      });
                     },
-                    icon: const Icon(
-                      Icons.info_outline,
+                    icon: Icon(
+                      _showDebugInfo ? Icons.bug_report : Icons.bug_report_outlined,
                       color: Colors.white,
                     ),
+                    tooltip: 'Toggle Debug Info',
                   ),
                 ],
               ),
             ),
+            
+            // Debug panel (if enabled)
+            if (_showDebugInfo) _buildDebugPanel(),
             
             // Chat messages
             Expanded(
@@ -437,128 +501,86 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
     return '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}';
   }
 
-  void _showApiKeyInfo() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.cardBackground,
-        title: Row(
-          children: [
-            Icon(
-              Icons.info_outline,
-              color: AppColors.purpleGradient.first,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'AI Configuration',
-              style: TextStyle(color: AppColors.textPrimary),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Zenturion AI Status',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.bold,
+  Widget _buildDebugPanel() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: AppSizes.paddingMd),
+      padding: const EdgeInsets.all(AppSizes.paddingSm),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(AppSizes.radiusSm),
+        border: Border.all(color: Colors.orange, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.bug_report, color: Colors.orange, size: 16),
+              const SizedBox(width: 8),
+              Text(
+                'Debug Panel',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: Colors.orange,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(
-                  AIService.isConfigured ? Icons.check_circle : Icons.error,
-                  color: AIService.isConfigured ? AppColors.success : AppColors.danger,
-                  size: 16,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  AIService.isConfigured ? 'Configured' : 'Not Configured',
-                  style: TextStyle(
-                    color: AIService.isConfigured ? AppColors.success : AppColors.danger,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Environment Configuration Status',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.bold,
+              const Spacer(),
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    _showDebugInfo = false;
+                  });
+                },
+                icon: const Icon(Icons.close, color: Colors.orange, size: 16),
+                iconSize: 16,
+                constraints: const BoxConstraints(),
+                padding: EdgeInsets.zero,
               ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            _getDebugInfo(),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.textSecondary,
+              fontFamily: 'monospace',
             ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(
-                  EnvConfig.isInitialized ? Icons.check_circle : Icons.error,
-                  color: EnvConfig.isInitialized ? AppColors.success : AppColors.danger,
-                  size: 16,
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              ElevatedButton.icon(
+                onPressed: () async {
+                  // Test configuration
+                  try {
+                    await EnvConfig.init();
+                    setState(() {});
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Configuration reloaded'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Failed to reload: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.refresh, size: 16),
+                label: const Text('Reload Config'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                  textStyle: const TextStyle(fontSize: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  'Environment: ${EnvConfig.isInitialized ? "Loaded" : "Failed to Load"}',
-                  style: TextStyle(
-                    color: EnvConfig.isInitialized ? AppColors.success : AppColors.danger,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(
-                  AIService.isConfigured ? Icons.check_circle : Icons.error,
-                  color: AIService.isConfigured ? AppColors.success : AppColors.danger,
-                  size: 16,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'OpenAI: ${AIService.isConfigured ? "Configured" : "Not Configured"}',
-                  style: TextStyle(
-                    color: AIService.isConfigured ? AppColors.success : AppColors.danger,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'To enable full OpenAI integration:',
-              style: TextStyle(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '1. Get an OpenAI API key from platform.openai.com\n'
-              '2. Copy .env.example to .env in the project root\n'
-              '3. Replace OPENAI_API_KEY value with your actual key\n'
-              '4. Restart the app to load the new configuration\n'
-              '5. Ensure you have API credits in your OpenAI account\n\n'
-              '💡 Current model: ${EnvConfig.openAIModel}\n'
-              '🎛️ Max tokens: ${EnvConfig.openAIMaxTokens}\n'
-              '🌡️ Temperature: ${EnvConfig.openAITemperature}\n'
-              '💰 Estimated cost: ~\$0.002 per conversation\n\n'
-              'Demo mode provides smart responses without API calls!',
-              style: TextStyle(color: AppColors.textSecondary),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Got it',
-              style: TextStyle(color: AppColors.purpleGradient.first),
-            ),
+            ],
           ),
         ],
       ),
