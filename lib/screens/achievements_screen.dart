@@ -190,7 +190,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                                   ),
                                   child: const Icon(
                                     Icons.emoji_events,
-                                    color: AppColors.yellowGradient,
+                                    color: Colors.orange,
                                     size: 24,
                                   ),
                                 ),
@@ -421,7 +421,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.star, color: AppColors.tealGradient, size: 16),
+                    const Icon(Icons.star, color: Colors.teal, size: 16),
                     const SizedBox(width: 4),
                     Text(
                       '${achievement.experienceReward} XP',

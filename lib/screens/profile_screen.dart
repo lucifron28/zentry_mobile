@@ -49,7 +49,7 @@ class ProfileScreen extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: AppColors.purpleGradient.map((c) => c.withOpacity(0.3)).toList(),
+                    colors: AppColors.purpleGradient.map((c) => c.withValues(alpha: 0.3)).toList(),
                   ),
                 ),
                 child: const Center(
