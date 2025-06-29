@@ -234,7 +234,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
         padding: const EdgeInsets.all(AppSizes.paddingMd),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 1,
-          childAspectRatio: 3.0,
+          childAspectRatio: 1.8, // Further reduced to give even more height to cards
           mainAxisSpacing: AppSizes.paddingMd,
         ),
         itemCount: projects.length,

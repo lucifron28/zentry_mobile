@@ -514,7 +514,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               )
             else
               SizedBox(
-                height: 80,
+                height: 110, // Increased height to accommodate badges and text without overflow
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: recentAchievements.length,

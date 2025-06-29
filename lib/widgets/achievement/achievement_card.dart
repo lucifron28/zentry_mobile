@@ -389,12 +389,18 @@ class AchievementBadge extends StatelessWidget {
           ],
         ),
         if (showProgress && achievement.currentProgress != null && achievement.requirementValue != null) ...[
-          const SizedBox(height: 4),
-          Text(
-            '${achievement.currentProgress}/${achievement.requirementValue}',
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: size * 0.2,
+          const SizedBox(height: 2), // Reduced spacing
+          SizedBox(
+            width: size + 16, // Appropriate width constraint
+            child: Text(
+              '${achievement.currentProgress}/${achievement.requirementValue}',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: size * 0.14, // Smaller font size to fit better
+              ),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
         ],

@@ -32,9 +32,10 @@ class ProjectCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppSizes.radiusMd),
         child: Padding(
-          padding: const EdgeInsets.all(AppSizes.paddingMd),
+          padding: const EdgeInsets.all(AppSizes.paddingSm), // Reduced padding from paddingMd
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min, // Allow column to size itself
             children: [
               Row(
                 children: [
@@ -56,7 +57,7 @@ class ProjectCard extends StatelessWidget {
                       size: AppSizes.iconMd,
                     ),
                   ),
-                  const SizedBox(width: AppSizes.paddingMd),
+                  const SizedBox(width: AppSizes.paddingSm), // Reduced spacing
                   
                   // Project info
                   Expanded(
@@ -69,6 +70,8 @@ class ProjectCard extends StatelessWidget {
                             color: AppColors.textPrimary,
                             fontWeight: FontWeight.w600,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         if (project.description.isNotEmpty) ...[
                           const SizedBox(height: 4),
@@ -129,58 +132,74 @@ class ProjectCard extends StatelessWidget {
                 ],
               ),
               
-              const SizedBox(height: AppSizes.paddingMd),
+              const SizedBox(height: AppSizes.paddingXs), // Further reduced spacing
               
               // Progress bar
               ProgressBar(
                 progress: progress,
-                height: 8,
+                height: 4, // Further reduced height
                 gradientColors: _getProjectGradient(project.color ?? 'purple'),
                 backgroundColor: AppColors.border,
                 showLabel: true,
                 label: 'Progress',
               ),
               
-              const SizedBox(height: AppSizes.paddingMd),
+              const SizedBox(height: AppSizes.paddingXs), // Further reduced spacing
               
-              // Project stats
-              Row(
-                children: [
-                  // Tasks count
-                  _buildStatChip(
-                    icon: Icons.task_alt,
-                    label: '${project.taskIds.length} tasks',
-                    color: AppColors.tealGradient.first,
-                  ),
-                  const SizedBox(width: AppSizes.paddingSm),
-                  
-                  // Status
-                  _buildStatChip(
-                    icon: _getStatusIcon(project.status),
-                    label: project.status.toUpperCase(),
-                    color: statusColor,
-                  ),
-                  
-                  const Spacer(),
-                  
-                  // Due date (if exists)
-                  if (project.dueDate != null) ...[
-                    Icon(
-                      Icons.schedule,
-                      size: 16,
-                      color: _getDueDateColor(project.dueDate!),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      _formatDueDate(project.dueDate!),
-                      style: TextStyle(
-                        color: _getDueDateColor(project.dueDate!),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
+              // Project stats - wrapped in Flexible to prevent overflow
+              Flexible(
+                child: Row(
+                  children: [
+                    // Tasks count
+                    Flexible(
+                      child: _buildStatChip(
+                        icon: Icons.task_alt,
+                        label: '${project.taskIds.length} tasks',
+                        color: AppColors.tealGradient.first,
                       ),
                     ),
+                    const SizedBox(width: AppSizes.paddingXs), // Further reduced spacing
+                    
+                    // Status
+                    Flexible(
+                      child: _buildStatChip(
+                        icon: _getStatusIcon(project.status),
+                        label: project.status.toUpperCase(),
+                        color: statusColor,
+                      ),
+                    ),
+                    
+                    const Spacer(),
+                    
+                    // Due date (if exists)
+                    if (project.dueDate != null) ...[
+                      Flexible(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.schedule,
+                              size: 14, // Smaller icon
+                              color: _getDueDateColor(project.dueDate!),
+                            ),
+                            const SizedBox(width: 2),
+                            Flexible(
+                              child: Text(
+                                _formatDueDate(project.dueDate!),
+                                style: TextStyle(
+                                  color: _getDueDateColor(project.dueDate!),
+                                  fontSize: 11, // Smaller font
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ],
           ),
@@ -196,8 +215,8 @@ class ProjectCard extends StatelessWidget {
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 4,
+        horizontal: 6, // Reduced padding
+        vertical: 2, // Reduced padding
       ),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.2),
@@ -208,15 +227,15 @@ class ProjectCard extends StatelessWidget {
         children: [
           Icon(
             icon,
-            size: 12,
+            size: 10, // Smaller icon
             color: color,
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 3), // Reduced spacing
           Text(
             label,
             style: TextStyle(
               color: color,
-              fontSize: 10,
+              fontSize: 9, // Smaller font
               fontWeight: FontWeight.w600,
             ),
           ),

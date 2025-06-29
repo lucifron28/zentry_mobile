@@ -12,7 +12,8 @@ class TasksScreen extends StatefulWidget {
   State<TasksScreen> createState() => _TasksScreenState();
 }
 
-class _TasksScreenState extends State<TasksScreen> {
+class _TasksScreenState extends State<TasksScreen> with TickerProviderStateMixin {
+  late TabController _tabController;
   
   // Mock tasks data
   final List<Task> _mockTasks = [
@@ -82,10 +83,12 @@ class _TasksScreenState extends State<TasksScreen> {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
   void dispose() {
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -164,36 +167,35 @@ class _TasksScreenState extends State<TasksScreen> {
             ),
           ];
         },
-        body: DefaultTabController(
-          length: 4,
-          child: Column(
-            children: [
-              Container(
-                color: AppColors.cardBackground,
-                child: TabBar(
-                  indicatorColor: AppColors.tealGradient.first,
-                  labelColor: AppColors.textPrimary,
-                  unselectedLabelColor: AppColors.textSecondary,
-                  tabs: const [
-                    Tab(text: 'All'),
-                    Tab(text: 'High Priority'),
-                    Tab(text: 'Completed'),
-                    Tab(text: 'Overdue'),
-                  ],
-                ),
+        body: Column(
+          children: [
+            Container(
+              color: AppColors.cardBackground,
+              child: TabBar(
+                controller: _tabController,
+                indicatorColor: AppColors.tealGradient.first,
+                labelColor: AppColors.textPrimary,
+                unselectedLabelColor: AppColors.textSecondary,
+                tabs: const [
+                  Tab(text: 'All'),
+                  Tab(text: 'High Priority'),
+                  Tab(text: 'Completed'),
+                  Tab(text: 'Overdue'),
+                ],
               ),
-              Expanded(
-                child: TabBarView(
-                  children: [
-                    _buildTaskList(_mockTasks, 'No tasks found'),
-                    _buildTaskList(_highPriorityTasks, 'No high priority tasks'),
-                    _buildTaskList(_completedTasks, 'No completed tasks'),
-                    _buildTaskList(_overdueTasks, 'No overdue tasks'),
-                  ],
-                ),
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildTaskList(_mockTasks, 'No tasks found'),
+                  _buildTaskList(_highPriorityTasks, 'No high priority tasks'),
+                  _buildTaskList(_completedTasks, 'No completed tasks'),
+                  _buildTaskList(_overdueTasks, 'No overdue tasks'),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
