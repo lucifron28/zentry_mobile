@@ -7,6 +7,8 @@ import '../widgets/common/gradient_button.dart';
 import '../providers/auth_provider.dart';
 import '../providers/task_provider.dart';
 import '../providers/achievement_provider.dart';
+import 'settings_screen.dart';
+import 'notifications_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -21,6 +23,26 @@ class ProfileScreen extends StatelessWidget {
             expandedHeight: 200,
             pinned: true,
             backgroundColor: AppColors.cardBackground,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.notifications),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const NotificationsScreen()),
+                  );
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.settings),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                  );
+                },
+              ),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
                 decoration: BoxDecoration(
@@ -150,8 +172,9 @@ class ProfileScreen extends StatelessWidget {
                           icon: Icons.notifications,
                           title: 'Notifications',
                           onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Notification settings coming soon!')),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const NotificationsScreen()),
                             );
                           },
                         ),
@@ -172,6 +195,17 @@ class ProfileScreen extends StatelessWidget {
                           onTap: () {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('Help & Support coming soon!')),
+                            );
+                          },
+                        ),
+                        const Divider(color: AppColors.border),
+                        _buildSettingItem(
+                          icon: Icons.settings,
+                          title: 'App Settings',
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const SettingsScreen()),
                             );
                           },
                         ),
