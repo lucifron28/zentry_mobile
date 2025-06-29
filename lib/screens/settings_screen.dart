@@ -31,7 +31,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _initializeWebhookSettings() async {
+    // Initialize defaults first
+    await WebhookService.initializeDefaults();
+    
     final events = WebhookService.getAvailableEvents();
+    final defaultUrls = WebhookService.getDefaultUrls();
+    
+    // Initialize URL controllers with default URLs
+    _urlControllers['discord'] = TextEditingController(text: defaultUrls['discord']);
+    _urlControllers['teams'] = TextEditingController(text: defaultUrls['teams']);
+    
     for (var eventType in events.keys) {
       final url = await WebhookService.getWebhookUrl(eventType);
       final enabled = await WebhookService.isWebhookEnabled(eventType);
@@ -239,7 +248,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _buildSettingTile(
                     icon: Icons.webhook,
                     title: 'Configure Webhooks',
-                    subtitle: 'Set up Discord and Teams notifications',
+                    subtitle: 'Pre-configured for Discord & Teams',
                     onTap: () => _showWebhookConfigDialog(context),
                   ),
                   const Divider(color: AppColors.border),
@@ -398,9 +407,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
     
     if (enabledCount == 0) {
-      return 'No webhooks configured';
+      return 'Ready to use - configure events';
     } else {
-      return '$enabledCount webhook${enabledCount == 1 ? '' : 's'} enabled';
+      return '$enabledCount event${enabledCount == 1 ? '' : 's'} active';
     }
   }
 
@@ -585,10 +594,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Webhook URLs',
+                'Webhook URLs (Preconfigured)',
                 style: TextStyle(
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Default URLs are already configured. Edit if needed.',
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 12,
                 ),
               ),
               const SizedBox(height: 8),
@@ -603,12 +620,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           WebhookService.setWebhookUrl(eventType, discordUrl);
                           _urlControllers[eventType]?.text = discordUrl;
                         }
+                        setState(() {});
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Discord URL applied to all events')),
                         );
                       },
                       icon: const Icon(Icons.discord, size: 16),
-                      label: const Text('Use Discord'),
+                      label: const Text('Apply Discord'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF5865F2).withValues(alpha: 0.8),
                         foregroundColor: Colors.white,
@@ -626,12 +644,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           WebhookService.setWebhookUrl(eventType, teamsUrl);
                           _urlControllers[eventType]?.text = teamsUrl;
                         }
+                        setState(() {});
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Teams URL applied to all events')),
                         );
                       },
                       icon: const Icon(Icons.groups, size: 16),
-                      label: const Text('Use Teams'),
+                      label: const Text('Apply Teams'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF6264A7).withValues(alpha: 0.8),
                         foregroundColor: Colors.white,
@@ -646,10 +665,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 controller: _urlControllers['discord'] ?? TextEditingController(),
                 style: const TextStyle(color: AppColors.textPrimary),
                 decoration: const InputDecoration(
-                  labelText: 'Discord Webhook URL',
+                  labelText: 'Discord Webhook URL (Editable)',
                   labelStyle: TextStyle(color: AppColors.textSecondary),
-                  hintText: 'https://discord.com/api/webhooks/1388537349004329001/K4dIFQM9rzNh3zn--SEuLrqAG9H_frhaKC5i__PUecpjfmjEdwO1zv96QKvIjBIV8d7L',
-                  hintStyle: TextStyle(color: AppColors.textSecondary),
+                  helperText: 'Pre-configured Discord webhook - edit if needed',
+                  helperStyle: TextStyle(color: AppColors.textSecondary, fontSize: 11),
                   border: OutlineInputBorder(),
                 ),
                 onChanged: (value) {
@@ -667,10 +686,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 controller: _urlControllers['teams'] ?? TextEditingController(),
                 style: const TextStyle(color: AppColors.textPrimary),
                 decoration: const InputDecoration(
-                  labelText: 'MS Teams Webhook URL',
+                  labelText: 'MS Teams Webhook URL (Editable)',
                   labelStyle: TextStyle(color: AppColors.textSecondary),
-                  hintText: 'https://mseufeduph.webhook.office.com/webhookb2/1d1a0208-f69a-47ed-9c1b-8c29c5fc9769@ddedb3cc-596d-482b-8e8c-6cc149a7a7b7/IncomingWebhook/09b5955c636a46688922a4e106304fd9/d8352f48-e96e-4321-800f-f998f9af400a/V21F7JNsmKeqN21d_HSU9mFN4tJ8jkpGlYB4mL892I1P01',
-                  hintStyle: TextStyle(color: AppColors.textSecondary),
+                  helperText: 'Pre-configured Teams webhook - edit if needed',
+                  helperStyle: TextStyle(color: AppColors.textSecondary, fontSize: 11),
                   border: OutlineInputBorder(),
                 ),
                 onChanged: (value) {
