@@ -237,13 +237,13 @@ class AchievementCard extends StatelessWidget {
 
   IconData _getAchievementIcon(String type) {
     switch (type.toLowerCase()) {
-      case AppConstants.taskBadge:
+      case 'task':
         return Icons.task_alt;
-      case AppConstants.streakBadge:
+      case 'streak':
         return Icons.local_fire_department;
-      case AppConstants.levelBadge:
+      case 'level':
         return Icons.trending_up;
-      case AppConstants.specialBadge:
+      case 'special':
         return Icons.star;
       default:
         return Icons.emoji_events;
@@ -252,13 +252,13 @@ class AchievementCard extends StatelessWidget {
 
   List<Color> _getGradientColors(String type) {
     switch (type.toLowerCase()) {
-      case AppConstants.taskBadge:
+      case 'task':
         return AppColors.tealGradient;
-      case AppConstants.streakBadge:
+      case 'streak':
         return AppColors.redGradient;
-      case AppConstants.levelBadge:
+      case 'level':
         return AppColors.purpleGradient;
-      case AppConstants.specialBadge:
+      case 'special':
         return AppColors.yellowGradient;
       default:
         return AppColors.blueGradient;
@@ -404,13 +404,13 @@ class AchievementBadge extends StatelessWidget {
 
   IconData _getAchievementIcon(String type) {
     switch (type.toLowerCase()) {
-      case AppConstants.taskBadge:
+      case 'task':
         return Icons.task_alt;
-      case AppConstants.streakBadge:
+      case 'streak':
         return Icons.local_fire_department;
-      case AppConstants.levelBadge:
+      case 'level':
         return Icons.trending_up;
-      case AppConstants.specialBadge:
+      case 'special':
         return Icons.star;
       default:
         return Icons.emoji_events;
@@ -419,13 +419,13 @@ class AchievementBadge extends StatelessWidget {
 
   List<Color> _getGradientColors(String type) {
     switch (type.toLowerCase()) {
-      case AppConstants.taskBadge:
+      case 'task':
         return AppColors.tealGradient;
-      case AppConstants.streakBadge:
+      case 'streak':
         return AppColors.redGradient;
-      case AppConstants.levelBadge:
+      case 'level':
         return AppColors.purpleGradient;
-      case AppConstants.specialBadge:
+      case 'special':
         return AppColors.yellowGradient;
       default:
         return AppColors.blueGradient;
