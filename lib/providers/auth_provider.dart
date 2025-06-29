@@ -24,6 +24,10 @@ class AuthProvider extends ChangeNotifier {
     _loadUserData();
   }
 
+  Future<void> init() async {
+    await _loadUserData();
+  }
+
   Future<void> _loadUserData() async {
     try {
       final prefs = await SharedPreferences.getInstance();
