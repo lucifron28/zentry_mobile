@@ -82,6 +82,11 @@ class AppColors {
     Color(0xFF06B6D4),
   ];
   
+  static const List<Color> orangeGradient = [
+    Color(0xFFF97316),
+    Color(0xFFEA580C),
+  ];
+  
   static const List<Color> greenGradient = [
     Color(0xFF10B981),
     Color(0xFF059669),
