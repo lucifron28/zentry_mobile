@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:provider/provider.dart';
 import '../utils/constants.dart';
 import '../models/task.dart';
+import '../providers/task_provider.dart';
 import '../widgets/task/task_card.dart';
 import '../widgets/common/glass_card.dart';
 
@@ -14,71 +16,6 @@ class TasksScreen extends StatefulWidget {
 
 class _TasksScreenState extends State<TasksScreen> with TickerProviderStateMixin {
   late TabController _tabController;
-  
-  // Mock tasks data
-  List<Task> _mockTasks = [
-    Task(
-      id: '1',
-      title: 'Complete Flutter Project',
-      description: 'Finish the Zentry mobile app with all features',
-      priority: 'high',
-      status: 'in_progress',
-      xpReward: 50,
-      dueDate: DateTime.now().add(const Duration(days: 2)),
-      createdAt: DateTime.now().subtract(const Duration(days: 1)),
-      updatedAt: DateTime.now(),
-      userId: 'user1',
-    ),
-    Task(
-      id: '2',
-      title: 'Review Code Documentation',
-      description: 'Go through all documentation and update outdated sections',
-      priority: 'medium',
-      status: 'pending',
-      xpReward: 25,
-      dueDate: DateTime.now().add(const Duration(days: 5)),
-      createdAt: DateTime.now().subtract(const Duration(hours: 12)),
-      updatedAt: DateTime.now(),
-      userId: 'user1',
-    ),
-    Task(
-      id: '3',
-      title: 'Setup CI/CD Pipeline',
-      description: 'Configure automated testing and deployment',
-      priority: 'high',
-      status: 'pending',
-      xpReward: 75,
-      dueDate: DateTime.now().add(const Duration(days: 7)),
-      createdAt: DateTime.now().subtract(const Duration(hours: 6)),
-      updatedAt: DateTime.now(),
-      userId: 'user1',
-    ),
-    Task(
-      id: '4',
-      title: 'Update Dependencies',
-      description: 'Update all Flutter dependencies to latest versions',
-      priority: 'low',
-      status: 'completed',
-      xpReward: 15,
-      dueDate: DateTime.now().subtract(const Duration(days: 1)),
-      createdAt: DateTime.now().subtract(const Duration(days: 3)),
-      updatedAt: DateTime.now().subtract(const Duration(days: 1)),
-      userId: 'user1',
-      completedAt: DateTime.now().subtract(const Duration(days: 1)),
-    ),
-    Task(
-      id: '5',
-      title: 'Write Unit Tests',
-      description: 'Add comprehensive unit tests for all core features',
-      priority: 'medium',
-      status: 'in_progress',
-      xpReward: 40,
-      dueDate: DateTime.now().add(const Duration(days: 3)),
-      createdAt: DateTime.now().subtract(const Duration(days: 2)),
-      updatedAt: DateTime.now(),
-      userId: 'user1',
-    ),
-  ];
 
   @override
   void initState() {
@@ -92,23 +29,25 @@ class _TasksScreenState extends State<TasksScreen> with TickerProviderStateMixin
     super.dispose();
   }
 
-  List<Task> get _activeTasks => _mockTasks.where((task) => 
-    task.status == 'pending' || task.status == 'in_progress').toList();
-  
-  List<Task> get _completedTasks => _mockTasks.where((task) => 
-    task.status == 'completed').toList();
-  
-  List<Task> get _highPriorityTasks => _mockTasks.where((task) => 
-    task.priority == 'high' && task.status != 'completed').toList();
-  
-  List<Task> get _overdueTasks => _mockTasks.where((task) => 
-    task.dueDate != null && 
-    task.dueDate!.isBefore(DateTime.now()) && 
-    task.status != 'completed').toList();
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Consumer<TaskProvider>(
+      builder: (context, taskProvider, child) {
+        final activeTasks = taskProvider.tasks.where((task) => 
+          task.status == 'pending' || task.status == 'in_progress').toList();
+        
+        final completedTasks = taskProvider.tasks.where((task) => 
+          task.status == 'completed').toList();
+        
+        final highPriorityTasks = taskProvider.tasks.where((task) => 
+          task.priority == 'high' && task.status != 'completed').toList();
+        
+        final overdueTasks = taskProvider.tasks.where((task) => 
+          task.dueDate != null && 
+          task.dueDate!.isBefore(DateTime.now()) && 
+          task.status != 'completed').toList();
+
+        return Scaffold(
       backgroundColor: AppColors.background,
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
@@ -144,9 +83,9 @@ class _TasksScreenState extends State<TasksScreen> with TickerProviderStateMixin
                           const SizedBox(height: AppSizes.paddingSm),
                           Row(
                             children: [
-                              _buildStatChip('${_activeTasks.length} Active', Icons.pending),
+                              _buildStatChip('${activeTasks.length} Active', Icons.pending),
                               const SizedBox(width: AppSizes.paddingSm),
-                              _buildStatChip('${_completedTasks.length} Done', Icons.check_circle),
+                              _buildStatChip('${completedTasks.length} Done', Icons.check_circle),
                             ],
                           ),
                         ],
@@ -188,16 +127,18 @@ class _TasksScreenState extends State<TasksScreen> with TickerProviderStateMixin
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  _buildTaskList(_mockTasks, 'No tasks found'),
-                  _buildTaskList(_highPriorityTasks, 'No high priority tasks'),
-                  _buildTaskList(_completedTasks, 'No completed tasks'),
-                  _buildTaskList(_overdueTasks, 'No overdue tasks'),
+                  _buildTaskList(taskProvider.tasks, 'No tasks found'),
+                  _buildTaskList(highPriorityTasks, 'No high priority tasks'),
+                  _buildTaskList(completedTasks, 'No completed tasks'),
+                  _buildTaskList(overdueTasks, 'No overdue tasks'),
                 ],
               ),
             ),
           ],
         ),
       ),
+        );
+      },
     );
   }
 
@@ -304,37 +245,27 @@ class _TasksScreenState extends State<TasksScreen> with TickerProviderStateMixin
     );
   }
 
-  void _toggleTaskCompletion(Task task) {
-    setState(() {
-      final index = _mockTasks.indexWhere((t) => t.id == task.id);
-      if (index != -1) {
-        final currentTask = _mockTasks[index];
-        final newStatus = currentTask.status == 'completed' ? 'pending' : 'completed';
-        final newCompletedAt = newStatus == 'completed' ? DateTime.now() : null;
-        
-        // Create updated task with new status using copyWith
-        final updatedTask = currentTask.copyWith(
-          status: newStatus,
-          completedAt: newCompletedAt,
-          updatedAt: DateTime.now(),
-        );
-        
-        _mockTasks[index] = updatedTask;
-      }
-    });
+  void _toggleTaskCompletion(Task task) async {
+    final taskProvider = Provider.of<TaskProvider>(context, listen: false);
+    final success = await taskProvider.toggleTaskCompletion(task.id);
     
-    // Show feedback
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          task.status == 'completed' 
-            ? 'Task marked as incomplete' 
-            : 'Task completed! +${task.xpReward} XP',
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            success 
+              ? task.isCompleted 
+                ? 'Task marked as pending'
+                : 'Task completed! +${task.xpReward} XP'
+              : 'Failed to update task',
+          ),
+          backgroundColor: success ? 
+            (task.isCompleted ? AppColors.warning : AppColors.success) : 
+            AppColors.danger,
+          duration: const Duration(seconds: 2),
         ),
-        backgroundColor: task.status == 'completed' ? AppColors.warning : AppColors.success,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+      );
+    }
   }
 
   void _editTask(Task task) {
