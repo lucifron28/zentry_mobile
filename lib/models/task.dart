@@ -11,6 +11,7 @@ class Task {
   final DateTime? completedAt;
   final String userId;
   final String? projectId;
+  final String? teamId;
   final String? assignedTo;
   final List<String> tags;
   final Map<String, dynamic>? metadata;
@@ -31,6 +32,7 @@ class Task {
     this.completedAt,
     required this.userId,
     this.projectId,
+    this.teamId,
     this.assignedTo,
     this.tags = const [],
     this.metadata,
@@ -104,6 +106,7 @@ class Task {
           : null,
       userId: json['user_id']?.toString() ?? '',
       projectId: json['project_id']?.toString(),
+      teamId: json['team_id']?.toString(),
       assignedTo: json['assigned_to']?.toString(),
       tags: List<String>.from(json['tags'] ?? []),
       metadata: json['metadata'] as Map<String, dynamic>?,
@@ -127,6 +130,7 @@ class Task {
       'completed_at': completedAt?.toIso8601String(),
       'user_id': userId,
       'project_id': projectId,
+      'team_id': teamId,
       'assigned_to': assignedTo,
       'tags': tags,
       'metadata': metadata,
@@ -149,6 +153,7 @@ class Task {
     DateTime? completedAt,
     String? userId,
     String? projectId,
+    String? teamId,
     String? assignedTo,
     List<String>? tags,
     Map<String, dynamic>? metadata,
@@ -169,6 +174,7 @@ class Task {
       completedAt: completedAt ?? this.completedAt,
       userId: userId ?? this.userId,
       projectId: projectId ?? this.projectId,
+      teamId: teamId ?? this.teamId,
       assignedTo: assignedTo ?? this.assignedTo,
       tags: tags ?? this.tags,
       metadata: metadata ?? this.metadata,
