@@ -232,7 +232,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             crossAxisCount: 2,
-            childAspectRatio: 1.8,
+            childAspectRatio: 1.5,
             crossAxisSpacing: AppSizes.paddingMd,
             mainAxisSpacing: AppSizes.paddingMd,
             children: AnimationConfiguration.toStaggeredList(

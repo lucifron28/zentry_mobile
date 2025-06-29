@@ -28,14 +28,16 @@ class StatCard extends StatelessWidget {
     return GlassCard(
       gradient: gradient,
       onTap: onTap,
+      padding: const EdgeInsets.all(AppSizes.paddingSm),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             children: [
               if (icon != null) ...[
                 Container(
-                  padding: const EdgeInsets.all(AppSizes.paddingSm),
+                  padding: const EdgeInsets.all(AppSizes.paddingXs),
                   decoration: BoxDecoration(
                     color: AppColors.textPrimary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppSizes.radiusSm),
@@ -46,7 +48,7 @@ class StatCard extends StatelessWidget {
                     color: gradient?.first ?? AppColors.textPrimary,
                   ),
                 ),
-                const SizedBox(width: AppSizes.paddingMd),
+                const SizedBox(width: AppSizes.paddingSm),
               ],
               Expanded(
                 child: Text(
@@ -55,17 +57,23 @@ class StatCard extends StatelessWidget {
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w600,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               if (trailing != null) trailing!,
             ],
           ),
-          const SizedBox(height: AppSizes.paddingMd),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              color: gradient?.first ?? AppColors.textPrimary,
-              fontWeight: FontWeight.w700,
+          const SizedBox(height: AppSizes.paddingSm),
+          Flexible(
+            child: Text(
+              value,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: gradient?.first ?? AppColors.textPrimary,
+                fontWeight: FontWeight.w700,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           if (subtitle != null) ...[
@@ -75,6 +83,8 @@ class StatCard extends StatelessWidget {
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: AppColors.textMuted,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ],
