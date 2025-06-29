@@ -31,16 +31,15 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
 
     try {
       final teamProvider = context.read<TeamProvider>();
-      final success = await teamProvider.joinTeamByInviteCode(
+      final success = await teamProvider.joinTeam(
         _inviteCodeController.text.trim(),
       );
 
       if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Successfully joined team!'),
-            backgroundColor: AppColors.primary,
-          ),
+        ScaffoldMessenger.of(context).showSnackBar(        const SnackBar(
+          content: Text('Successfully joined team!'),
+          backgroundColor: AppColors.success,
+        ),
         );
         Navigator.of(context).pop();
       } else if (mounted) {
@@ -94,7 +93,11 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
               // Header
               Container(
                 decoration: BoxDecoration(
-                  gradient: AppColors.orangeGradient,
+                  gradient: LinearGradient(
+                    colors: AppColors.orangeGradient,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 padding: const EdgeInsets.all(24),
@@ -151,7 +154,7 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
                           hintText: 'Enter 6-character invite code',
                           hintStyle: const TextStyle(color: AppColors.textSecondary),
                           filled: true,
-                          fillColor: AppColors.surface.withOpacity(0.3),
+                          fillColor: AppColors.cardBackground.withOpacity(0.3),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none,
@@ -161,14 +164,13 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
                             borderSide: BorderSide(
                               color: AppColors.textSecondary.withOpacity(0.3),
                             ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(
-                              color: AppColors.primary,
-                              width: 2,
+                          ),                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: AppColors.success,
+                                width: 2,
+                              ),
                             ),
-                          ),
                           prefixIcon: const Icon(
                             Icons.key,
                             color: AppColors.textSecondary,
@@ -197,7 +199,7 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _joinTeam,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
+                            backgroundColor: AppColors.success,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -277,7 +279,7 @@ class _JoinTeamScreenState extends State<JoinTeamScreen> {
         Icon(
           icon,
           size: 16,
-          color: AppColors.primary,
+          color: AppColors.success,
         ),
         const SizedBox(width: 12),
         Expanded(
