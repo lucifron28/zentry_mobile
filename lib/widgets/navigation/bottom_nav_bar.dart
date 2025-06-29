@@ -29,58 +29,66 @@ class CustomBottomNavBar extends StatelessWidget {
       ),
       child: SafeArea(
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: items.asMap().entries.map((entry) {
             final index = entry.key;
             final item = entry.value;
             final isSelected = index == currentIndex;
 
-            return GestureDetector(
-              onTap: () => onTap(index),
-              child: AnimatedContainer(
-                duration: AppConstants.shortAnimation,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSizes.paddingMd,
-                  vertical: AppSizes.paddingSm,
-                ),
-                decoration: BoxDecoration(
-                  gradient: isSelected
-                      ? const LinearGradient(
-                          colors: AppColors.purpleGradient,
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        )
-                      : null,
-                  borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    AnimatedSwitcher(
-                      duration: AppConstants.shortAnimation,
-                      child: Icon(
-                        isSelected ? item.activeIcon : item.icon,
-                        key: ValueKey(isSelected),
-                        color: isSelected
-                            ? Colors.white
-                            : AppColors.textSecondary,
-                        size: AppSizes.iconMd,
+            return Expanded(
+              child: GestureDetector(
+                onTap: () => onTap(index),
+                child: AnimatedContainer(
+                  duration: AppConstants.shortAnimation,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSizes.paddingSm,
+                    vertical: AppSizes.paddingSm,
+                  ),
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(
+                    gradient: isSelected
+                        ? const LinearGradient(
+                            colors: AppColors.purpleGradient,
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          )
+                        : null,
+                    borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AnimatedSwitcher(
+                        duration: AppConstants.shortAnimation,
+                        child: Icon(
+                          isSelected ? item.activeIcon : item.icon,
+                          key: ValueKey(isSelected),
+                          color: isSelected
+                              ? Colors.white
+                              : AppColors.textSecondary,
+                          size: AppSizes.iconMd,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      item.label,
-                      style: TextStyle(
-                        color: isSelected
-                            ? Colors.white
-                            : AppColors.textSecondary,
-                        fontSize: 12,
-                        fontWeight: isSelected
-                            ? FontWeight.w600
-                            : FontWeight.w400,
+                      const SizedBox(height: 4),
+                      Flexible(
+                        child: Text(
+                          item.label,
+                          style: TextStyle(
+                            color: isSelected
+                                ? Colors.white
+                                : AppColors.textSecondary,
+                            fontSize: 10,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );
