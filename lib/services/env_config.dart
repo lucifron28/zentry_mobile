@@ -26,7 +26,20 @@ class EnvConfig {
   /// Check if environment is properly initialized
   static bool get isInitialized => _initialized;
   
-  // OpenAI Configuration
+  // Google Gemini Configuration (Primary AI Service)
+  static String get geminiApiKey => 
+      dotenv.env['GEMINI_API_KEY'] ?? 'your_gemini_api_key_here';
+  
+  static String get geminiModel => 
+      dotenv.env['GEMINI_MODEL'] ?? 'gemini-1.5-flash';
+  
+  static int get geminiMaxTokens => 
+      int.tryParse(dotenv.env['GEMINI_MAX_TOKENS'] ?? '2048') ?? 2048;
+  
+  static double get geminiTemperature => 
+      double.tryParse(dotenv.env['GEMINI_TEMPERATURE'] ?? '0.7') ?? 0.7;
+
+  // OpenAI Configuration (Legacy - for backward compatibility)
   static String get openAIApiKey => 
       dotenv.env['OPENAI_API_KEY'] ?? 'your_openai_api_key_here';
   
@@ -70,20 +83,33 @@ class EnvConfig {
   static String? get mixpanelToken => 
       dotenv.env['MIXPANEL_TOKEN'];
   
-  /// Check if OpenAI is properly configured
+  /// Check if Gemini is properly configured
+  static bool get isGeminiConfigured => 
+      geminiApiKey != 'your_gemini_api_key_here' && 
+      geminiApiKey.isNotEmpty;
+
+  /// Check if OpenAI is properly configured (legacy)
   static bool get isOpenAIConfigured => 
       openAIApiKey != 'your_openai_api_key_here' && 
       openAIApiKey.isNotEmpty &&
       openAIApiKey.startsWith('sk-');
+
+  /// Check if any AI service is configured (prioritize Gemini)
+  static bool get isAIConfigured => isGeminiConfigured || isOpenAIConfigured;
   
   /// Get configuration summary for debugging
   static Map<String, dynamic> getConfigSummary() {
     return {
       'initialized': _initialized,
+      'gemini_configured': isGeminiConfigured,
+      'gemini_model': geminiModel,
+      'gemini_maxTokens': geminiMaxTokens,
+      'gemini_temperature': geminiTemperature,
       'openAI_configured': isOpenAIConfigured,
       'openAI_model': openAIModel,
       'openAI_maxTokens': openAIMaxTokens,
       'openAI_temperature': openAITemperature,
+      'ai_configured': isAIConfigured,
       'app_name': appName,
       'app_version': appVersion,
       'debug_mode': debugMode,
@@ -104,16 +130,28 @@ class EnvConfig {
       issues.add('.env file not loaded');
     }
     
-    if (!isOpenAIConfigured) {
-      issues.add('OpenAI API key not configured');
+    if (!isAIConfigured) {
+      issues.add('No AI service configured (Gemini or OpenAI)');
     }
     
-    if (openAIMaxTokens <= 0) {
-      issues.add('Invalid OpenAI max tokens value');
+    if (isGeminiConfigured) {
+      if (geminiMaxTokens <= 0) {
+        issues.add('Invalid Gemini max tokens value');
+      }
+      
+      if (geminiTemperature < 0 || geminiTemperature > 2) {
+        issues.add('Invalid Gemini temperature value (should be 0-2)');
+      }
     }
     
-    if (openAITemperature < 0 || openAITemperature > 2) {
-      issues.add('Invalid OpenAI temperature value (should be 0-2)');
+    if (isOpenAIConfigured) {
+      if (openAIMaxTokens <= 0) {
+        issues.add('Invalid OpenAI max tokens value');
+      }
+      
+      if (openAITemperature < 0 || openAITemperature > 2) {
+        issues.add('Invalid OpenAI temperature value (should be 0-2)');
+      }
     }
     
     return issues;
