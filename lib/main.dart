@@ -9,11 +9,15 @@ import 'providers/task_provider.dart';
 import 'providers/achievement_provider.dart';
 import 'providers/project_provider.dart';
 import 'providers/notification_provider.dart';
+import 'services/env_config.dart';
 import 'screens/main_layout.dart';
 import 'screens/auth/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize environment configuration
+  await EnvConfig.init();
   
   // Set system UI overlay style
   SystemChrome.setSystemUIOverlayStyle(
