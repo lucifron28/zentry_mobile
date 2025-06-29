@@ -166,6 +166,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     _buildLevelCard(),
                     const SizedBox(height: AppSizes.paddingMd),
                     
+                    // Progress Tracking
+                    _buildProgressTrackingSection(),
+                    const SizedBox(height: AppSizes.paddingMd),
+                    
                     // Stats Overview
                     _buildStatsSection(),
                     const SizedBox(height: AppSizes.paddingMd),
@@ -258,6 +262,231 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   nextLevelXP: AppConstants.baseXpPerLevel + (user.level * AppConstants.xpMultiplier),
                   level: user.level,
                   showLevel: false,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildProgressTrackingSection() {
+    return Consumer3<TaskProvider, ProjectProvider, AchievementProvider>(
+      builder: (context, taskProvider, projectProvider, achievementProvider, child) {
+        final totalTasks = taskProvider.totalTasks;
+        final completedTasks = taskProvider.completedTasks;
+        final overdueTasks = taskProvider.overdueTasks;
+        final dueTodayTasks = taskProvider.dueTodayTasks;
+        
+        final totalProjects = projectProvider.totalProjects;
+        final activeProjects = projectProvider.activeProjects;
+        final completedProjects = projectProvider.completedProjects;
+        
+        final taskProgress = totalTasks > 0 ? completedTasks / totalTasks : 0.0;
+        final projectProgress = totalProjects > 0 ? completedProjects / totalProjects : 0.0;
+        final achievementProgress = achievementProvider.completionRate;
+
+        return GlassCard(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSizes.paddingMd),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Progress Tracking',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: AppSizes.paddingMd),
+                
+                // Task Progress
+                Row(
+                  children: [
+                    Icon(Icons.task_alt, color: AppColors.tealGradient.first, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Tasks',
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: AppColors.textPrimary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                '$completedTasks/$totalTasks',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          ProgressBar(
+                            progress: taskProgress,
+                            height: 6,
+                            gradientColors: AppColors.tealGradient,
+                            backgroundColor: AppColors.textSecondary.withValues(alpha: 0.2),
+                          ),
+                          if (overdueTasks > 0 || dueTodayTasks > 0) ...[
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                if (dueTodayTasks > 0) ...[
+                                  Icon(Icons.today, size: 12, color: AppColors.warning),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '$dueTodayTasks due today',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: AppColors.warning,
+                                    ),
+                                  ),
+                                ],
+                                if (dueTodayTasks > 0 && overdueTasks > 0)
+                                  const Text(' • ', style: TextStyle(fontSize: 10)),
+                                if (overdueTasks > 0) ...[
+                                  Icon(Icons.warning, size: 12, color: AppColors.danger),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '$overdueTasks overdue',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: AppColors.danger,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: AppSizes.paddingMd),
+                
+                // Project Progress
+                Row(
+                  children: [
+                    Icon(Icons.folder, color: AppColors.purpleGradient.first, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Projects',
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: AppColors.textPrimary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                '$completedProjects/$totalProjects',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          ProgressBar(
+                            progress: projectProgress,
+                            height: 6,
+                            gradientColors: AppColors.purpleGradient,
+                            backgroundColor: AppColors.textSecondary.withValues(alpha: 0.2),
+                          ),
+                          if (activeProjects > 0) ...[
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Icon(Icons.play_circle, size: 12, color: AppColors.success),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '$activeProjects active',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: AppColors.success,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: AppSizes.paddingMd),
+                
+                // Achievement Progress
+                Row(
+                  children: [
+                    Icon(Icons.emoji_events, color: AppColors.yellowGradient.first, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Achievements',
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: AppColors.textPrimary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                '${achievementProvider.earnedAchievements}/${achievementProvider.totalAchievements}',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          ProgressBar(
+                            progress: achievementProgress,
+                            height: 6,
+                            gradientColors: AppColors.yellowGradient,
+                            backgroundColor: AppColors.textSecondary.withValues(alpha: 0.2),
+                          ),
+                          if (achievementProvider.readyToClaim > 0) ...[
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Icon(Icons.card_giftcard, size: 12, color: AppColors.warning),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${achievementProvider.readyToClaim} ready to claim',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: AppColors.warning,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -399,7 +628,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     },
                     onToggleComplete: () async {
                       final success = await taskProvider.completeTask(task.id);
-                      if (mounted) {
+                      if (mounted && context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
@@ -419,7 +648,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     },
                     onDelete: () async {
                       final success = await taskProvider.deleteTask(task.id);
-                      if (mounted) {
+                      if (mounted && context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
