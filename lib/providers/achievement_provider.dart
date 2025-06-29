@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import '../models/achievement.dart';
 
 class AchievementProvider extends ChangeNotifier {
@@ -47,9 +48,22 @@ class AchievementProvider extends ChangeNotifier {
     return earnedAchievements / totalAchievements;
   }
 
+  Future<void> init() async {
+    await loadAchievements();
+    await loadStats();
+  }
+
   AchievementProvider() {
-    loadAchievements();
-    loadStats();
+    // Initialize with empty data to prevent crashes
+    _achievements = [];
+    _filteredAchievements = [];
+    _stats = null;
+    
+    // Data is now loaded via init()
+    // Future.delayed(const Duration(milliseconds: 100), () {
+    //   loadAchievements();
+    //   loadStats();
+    // });
   }
 
   Future<void> loadAchievements() async {

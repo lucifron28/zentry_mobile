@@ -12,6 +12,11 @@ import '../widgets/common/progress_bar.dart';
 import '../widgets/task/task_card.dart';
 import '../widgets/achievement/achievement_card.dart';
 import '../widgets/project/project_card.dart';
+import 'tasks_screen.dart';
+import 'projects_screen.dart';
+import 'achievements_screen.dart';
+import 'notifications_screen.dart';
+import 'settings_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -35,6 +40,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
       context.read<AchievementProvider>().loadAchievements(),
       context.read<ProjectProvider>().loadProjects(),
     ]);
+  }
+
+  void _navigateToScreen(int index) {
+    // Find the parent MainLayout and trigger navigation
+    final mainLayoutContext = context.findAncestorStateOfType<State<StatefulWidget>>();
+    if (mainLayoutContext != null) {
+      // Use a callback to notify parent or use a different approach
+      // For now, we'll use Navigator.push as a fallback
+      switch (index) {
+        case 1: // Tasks
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const TasksScreen()),
+          );
+          break;
+        case 2: // Projects
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ProjectsScreen()),
+          );
+          break;
+        case 3: // Achievements
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AchievementsScreen()),
+          );
+          break;
+      }
+    }
   }
 
   @override
@@ -101,12 +135,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     icon: const Icon(Icons.notifications_outlined, color: Colors.white),
                     onPressed: () {
                       // Navigate to notifications
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const NotificationsScreen()),
+                      );
                     },
                   ),
                   IconButton(
                     icon: const Icon(Icons.settings_outlined, color: Colors.white),
                     onPressed: () {
                       // Navigate to settings
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                      );
                     },
                   ),
                 ],
@@ -247,24 +289,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   value: '$completedTasks/$totalTasks',
                   icon: Icons.task_alt,
                   gradient: AppColors.tealGradient,
+                  onTap: () => _navigateToScreen(1), // Navigate to tasks
                 ),
                 StatCard(
                   title: 'Achievements',
                   value: '$earnedAchievements',
                   icon: Icons.emoji_events,
                   gradient: AppColors.yellowGradient,
+                  onTap: () => _navigateToScreen(3), // Navigate to achievements
                 ),
                 StatCard(
                   title: 'Projects',
                   value: '$activeProjects',
                   icon: Icons.folder,
                   gradient: AppColors.purpleGradient,
+                  onTap: () => _navigateToScreen(2), // Navigate to projects
                 ),
                 StatCard(
                   title: 'Streak',
                   value: '7 days', // Mock data
                   icon: Icons.local_fire_department,
                   gradient: AppColors.redGradient,
+                  onTap: () => _navigateToScreen(3), // Navigate to achievements (streak is part of achievements)
                 ),
               ],
             ),
@@ -298,6 +344,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 TextButton(
                   onPressed: () {
                     // Navigate to tasks screen
+                    _navigateToScreen(1); // Tasks screen is at index 1
                   },
                   child: Text(
                     'See All',
@@ -328,12 +375,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     task: task,
                     onTap: () {
                       // Navigate to task details
+                      _navigateToScreen(1); // Navigate to tasks screen
                     },
                     onToggleComplete: () {
                       taskProvider.completeTask(task.id);
                     },
                     onEdit: () {
                       // Navigate to edit task
+                      _navigateToScreen(1); // Navigate to tasks screen where editing can be done
                     },
                     onDelete: () {
                       taskProvider.deleteTask(task.id);
@@ -372,6 +421,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 TextButton(
                   onPressed: () {
                     // Navigate to projects screen
+                    _navigateToScreen(2); // Projects screen is at index 2
                   },
                   child: Text(
                     'See All',
@@ -407,6 +457,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     project: project,
                     onTap: () {
                       // Navigate to project details
+                      _navigateToScreen(2); // Navigate to projects screen
                     },
                   );
                 },
@@ -441,6 +492,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 TextButton(
                   onPressed: () {
                     // Navigate to achievements screen
+                    _navigateToScreen(3); // Achievements screen is at index 3
                   },
                   child: Text(
                     'See All',

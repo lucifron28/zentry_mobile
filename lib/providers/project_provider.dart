@@ -25,8 +25,12 @@ class ProjectProvider extends ChangeNotifier {
   int get cancelledProjects => _projects.where((p) => p.isCancelled).length;
   int get overdueProjects => _projects.where((p) => p.isOverdue).length;
 
+  Future<void> init() async {
+    await loadProjects();
+  }
+
   ProjectProvider() {
-    loadProjects();
+    // loadProjects();
   }
 
   Future<void> loadProjects() async {

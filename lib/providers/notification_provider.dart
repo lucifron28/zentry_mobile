@@ -28,9 +28,14 @@ class NotificationProvider extends ChangeNotifier {
 
   bool get hasUnreadNotifications => unreadNotifications > 0;
 
+  Future<void> init() async {
+    await loadNotifications();
+    await _loadPreferences();
+  }
+
   NotificationProvider() {
-    loadNotifications();
-    _loadPreferences();
+    // loadNotifications();
+    // _loadPreferences();
   }
 
   Future<void> loadNotifications() async {

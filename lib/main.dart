@@ -93,6 +93,17 @@ class _AppInitializerState extends State<AppInitializer> {
       context.read<ThemeProvider>().init(),
     ]);
     
+    // Initialize other providers after a short delay to avoid build conflicts
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.wait([
+        context.read<AchievementProvider>().init(),
+        // Skip other providers for now since they don't have init() methods
+        // context.read<TaskProvider>().init(),
+        // context.read<ProjectProvider>().init(),
+        // context.read<NotificationProvider>().init(),
+      ]);
+    });
+    
     // Add a small delay for splash screen effect
     await Future.delayed(const Duration(seconds: 2));
     

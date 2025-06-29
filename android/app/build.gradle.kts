@@ -8,8 +8,6 @@ plugins {
 android {
     namespace = "com.example.zentry_mobile"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -28,6 +26,9 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        
+        // Explicitly disable NDK builds
+        ndk.abiFilters.clear()
     }
 
     buildTypes {

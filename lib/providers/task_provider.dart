@@ -35,8 +35,12 @@ class TaskProvider extends ChangeNotifier {
   int get mediumPriorityTasks => _tasks.where((task) => task.priority == 'medium').length;
   int get lowPriorityTasks => _tasks.where((task) => task.priority == 'low').length;
 
+  Future<void> init() async {
+    await loadTasks();
+  }
+
   TaskProvider() {
-    loadTasks();
+    // loadTasks();
   }
 
   Future<void> loadTasks() async {
