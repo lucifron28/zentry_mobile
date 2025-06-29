@@ -251,6 +251,27 @@ class WebhookService {
     );
   }
 
+  /// Send webhook notification for team deletion
+  static Future<void> sendTeamDeleted({
+    required String teamId,
+    required String teamName,
+  }) async {
+    await _sendWebhook(
+      'team_deleted',
+      {
+        'event': 'team_deleted',
+        'team': {
+          'id': teamId,
+          'name': teamName,
+        },
+        'user': {
+          'name': 'Ron Vincent Cada',
+        },
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
+  }
+
   /// Internal method to send webhook
   static Future<void> _sendWebhook(String eventType, Map<String, dynamic> payload) async {
     try {
