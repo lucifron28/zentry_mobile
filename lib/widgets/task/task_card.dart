@@ -41,6 +41,7 @@ class TaskCard extends StatelessWidget {
                 onTap: onToggleComplete,
                 child: AnimatedContainer(
                   duration: AppConstants.shortAnimation,
+                  curve: Curves.easeInOut,
                   width: 24,
                   height: 24,
                   decoration: BoxDecoration(
