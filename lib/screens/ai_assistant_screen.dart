@@ -37,8 +37,8 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
     final isConfigured = AIService.isConfigured;
     
     final welcomeText = isConfigured
-        ? "Hello! I'm Zenturion, your AI productivity assistant powered by OpenAI. I'm here to help you manage tasks, organize projects, and achieve your goals through Zentry's gamified system. How can I help boost your productivity today?"
-        : "Hello! I'm Zenturion, your AI productivity assistant. I'm currently running in demo mode because the OpenAI API key isn't configured properly. I can still help you with productivity tips and guidance! To unlock my full AI capabilities, please check the debug information below. How can I assist you today?";
+        ? "Hello! I'm Zenturion, your AI productivity assistant powered by Google Gemini. I'm here to help you manage tasks, organize projects, and achieve your goals through Zentry's gamified system. How can I help boost your productivity today?"
+        : "Hello! I'm Zenturion, your AI productivity assistant. I'm currently running in demo mode because the Gemini API key isn't configured properly. I can still help you with productivity tips and guidance! To unlock my full AI capabilities, please check the debug information below. How can I assist you today?";
         
     _messages.add(
       ChatMessage(
@@ -61,28 +61,34 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
   }
   
   String _getDebugInfo() {
-    final apiKey = EnvConfig.openAIApiKey;
+    final apiKey = EnvConfig.geminiApiKey;
     final hasValidKey = apiKey.isNotEmpty && 
-                       apiKey != 'your_openai_api_key_here' && 
-                       apiKey.startsWith('sk-');
+                       apiKey != 'your_gemini_api_key_here';
     
     return """
 Environment Status:
 • Initialized: ${EnvConfig.isInitialized ? '✅' : '❌'}
 • Debug Mode: ${EnvConfig.debugMode ? '✅' : '❌'}
 
-OpenAI Configuration:
+Google Gemini Configuration:
 • API Key Present: ${hasValidKey ? '✅' : '❌'}
 • API Key Length: ${apiKey.length} characters
 • API Key Prefix: ${apiKey.length > 10 ? apiKey.substring(0, 10) + '...' : apiKey}
-• Model: ${EnvConfig.openAIModel}
-• Max Tokens: ${EnvConfig.openAIMaxTokens}
-• Temperature: ${EnvConfig.openAITemperature}
+• Model: ${EnvConfig.geminiModel}
+• Max Tokens: ${EnvConfig.geminiMaxTokens}
+• Temperature: ${EnvConfig.geminiTemperature}
 
 Service Status:
 • AI Service Configured: ${AIService.isConfigured ? '✅' : '❌'}
 
-Note: If you just updated the .env file, please completely restart the app (not hot reload) for changes to take effect.
+Setup Instructions (if not configured):
+1. Visit: https://makersuite.google.com/app/apikey
+2. Create or get your Gemini API key
+3. Copy .env.example to .env
+4. Replace 'your_gemini_api_key_here' with your actual key
+5. Restart the app completely (not hot reload)
+
+Note: Gemini offers a generous free tier, making it ideal for personal productivity apps.
 """;
   }
 
