@@ -177,6 +177,20 @@ class TeamProvider extends ChangeNotifier {
 
   Future<bool> deleteTeam(String teamId) async {
     try {
+      // Store team name before deletion for webhook
+      final teamToDelete = _teams.firstWhere(
+        (t) => t.id == teamId, 
+        orElse: () => Team(
+          id: teamId, 
+          name: 'Unknown Team', 
+          description: '', 
+          type: TeamType.project, 
+          createdBy: 'unknown',
+          createdAt: DateTime.now(),
+          members: [],
+        ),
+      );
+      
       final success = await _teamService.deleteTeam(teamId);
       
       if (success) {
@@ -189,15 +203,7 @@ class TeamProvider extends ChangeNotifier {
         // Send webhook notification
         WebhookService.sendTeamDeleted(
           teamId: teamId,
-          teamName: _teams.firstWhere((t) => t.id == teamId, 
-              orElse: () => Team(
-                id: teamId, 
-                name: 'Unknown Team', 
-                description: '', 
-                type: TeamType.project, 
-                createdAt: DateTime.now(),
-                members: [],
-              )).name,
+          teamName: teamToDelete.name,
         );
       }
       
@@ -248,10 +254,5 @@ class TeamProvider extends ChangeNotifier {
   void _clearError() {
     _error = null;
     notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 }
