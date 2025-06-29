@@ -7,7 +7,7 @@ A gamified productivity app built with Flutter, featuring AI-powered assistance 
 - 📱 **Task Management** - Create, organize, and track your tasks
 - 📁 **Project Organization** - Group tasks into projects with progress tracking
 - 🏆 **Achievement System** - Earn XP and unlock achievements
-- 🤖 **AI Assistant (Zenturion)** - Get productivity help powered by OpenAI
+- 🤖 **AI Assistant (Zenturion)** - Get productivity help powered by Google Gemini
 - 📊 **Progress Dashboard** - Visual overview of your productivity
 
 ## Getting Started
@@ -39,11 +39,11 @@ flutter run
 
 To enable the full AI capabilities of Zenturion:
 
-### 1. Get OpenAI API Key
-- Visit [OpenAI Platform](https://platform.openai.com/api-keys)
-- Create an account or sign in
+### 1. Get Google Gemini API Key
+- Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
+- Create an account or sign in with your Google account
 - Generate a new API key
-- Ensure you have credits in your account
+- The free tier offers generous limits for personal use
 
 ### 2. Configure Environment Variables
 - Copy `.env.example` to `.env` in the project root:
@@ -53,15 +53,15 @@ cp .env.example .env
 
 - Open `.env` and replace the placeholder with your actual API key:
 ```env
-OPENAI_API_KEY=sk-your-actual-openai-api-key-here
+GEMINI_API_KEY=your-actual-gemini-api-key-here
 ```
 
 ### 3. Optional Configuration
 You can customize other settings in `.env`:
 ```env
-OPENAI_MODEL=gpt-3.5-turbo          # AI model to use
-OPENAI_MAX_TOKENS=500               # Response length limit
-OPENAI_TEMPERATURE=0.7              # Creativity level (0-2)
+GEMINI_MODEL=gemini-1.5-flash       # AI model to use (fast and efficient)
+GEMINI_MAX_TOKENS=2048              # Response length limit
+GEMINI_TEMPERATURE=0.7              # Creativity level (0-2)
 DEBUG_MODE=true                     # Enable debug features
 ```
 
@@ -69,13 +69,14 @@ DEBUG_MODE=true                     # Enable debug features
 - Restart the app to load the new configuration
 - Navigate to the AI Assistant tab (middle tab with brain icon)
 - Start a conversation with Zenturion
-- The info button shows configuration status
+- The debug info shows configuration status
 
-### Cost Information
-- Model: GPT-3.5-turbo (fast and cost-effective)
-- Estimated cost: ~$0.001-0.005 per conversation
-- Input: $0.0015 per 1K tokens
-- Output: $0.002 per 1K tokens
+### Advantages of Gemini
+- **Free tier** with generous limits
+- **Fast responses** and better context understanding
+- **Multimodal capabilities** (text, images)
+- **Higher quality** responses compared to older models
+- **No credit card required** for basic usage
 
 ### Demo Mode
 If the `.env` file is missing or the API key isn't configured, Zenturion runs in demo mode with smart placeholder responses.
@@ -101,7 +102,7 @@ lib/
 
 - **Flutter** - Cross-platform mobile framework
 - **Provider** - State management
-- **OpenAI GPT-3.5-turbo** - AI assistant capabilities
+- **Google Gemini** - AI assistant capabilities
 - **HTTP** - API communication
 - **Shared Preferences** - Local data persistence
 - **Glassmorphism** - Modern UI effects
