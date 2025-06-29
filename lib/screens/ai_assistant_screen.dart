@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../utils/constants.dart';
 import '../widgets/common/glass_card.dart';
 import '../services/ai_service.dart';
 import '../services/env_config.dart';
+import '../providers/task_provider.dart';
+import '../providers/achievement_provider.dart';
 
 class AIAssistantScreen extends StatefulWidget {
   const AIAssistantScreen({super.key});
@@ -73,7 +76,7 @@ Environment Status:
 Google Gemini Configuration:
 • API Key Present: ${hasValidKey ? '✅' : '❌'}
 • API Key Length: ${apiKey.length} characters
-• API Key Prefix: ${apiKey.length > 10 ? apiKey.substring(0, 10) + '...' : apiKey}
+• API Key Prefix: ${apiKey.length > 10 ? '${apiKey.substring(0, 10)}...' : apiKey}
 • Model: ${EnvConfig.geminiModel}
 • Max Tokens: ${EnvConfig.geminiMaxTokens}
 • Temperature: ${EnvConfig.geminiTemperature}
@@ -134,10 +137,16 @@ Note: Gemini offers a generous free tier, making it ideal for personal productiv
         }
       }
       
-      // Use AI service for response
+      // Get real user context
+      final userContext = _getUserContext(context);
+      
+      // Use AI service for response with enhanced context
       String aiResponse = await AIService.sendMessage(
         userMessage,
         conversationHistory: conversationHistory,
+        currentScreen: 'ai_assistant',
+        userStats: userContext['userStats'],
+        recentTasks: userContext['recentTasks'],
       );
       
       if (EnvConfig.debugMode) {
@@ -204,6 +213,39 @@ Note: Gemini offers a generous free tier, making it ideal for personal productiv
     } else {
       return "I understand you're looking for assistance with productivity. While I'm still learning about your specific needs, I'm here to help you stay organized and achieve your goals. Could you tell me more about what you'd like to accomplish?";
     }
+  }
+
+  /// Get real user context from app providers
+  Map<String, dynamic> _getUserContext(BuildContext context) {
+    final taskProvider = Provider.of<TaskProvider>(context, listen: false);
+    final achievementProvider = Provider.of<AchievementProvider>(context, listen: false);
+    
+    // Get user stats
+    final userStats = {
+      'level': (achievementProvider.earnedAchievements / 5).floor() + 1, // Simple level calculation
+      'xp': achievementProvider.totalXpFromAchievements + (taskProvider.completedTasks * 10),
+      'streak': 7, // This would come from actual streak tracking
+      'completedTasks': taskProvider.completedTasks,
+      'totalTasks': taskProvider.totalTasks,
+      'achievementsEarned': achievementProvider.earnedAchievements,
+      'totalAchievements': achievementProvider.totalAchievements,
+    };
+    
+    // Get recent tasks (last 5)
+    final recentTasks = taskProvider.allTasks
+        .take(5)
+        .map((task) => {
+          'title': task.title,
+          'completed': task.isCompleted,
+          'priority': task.priority,
+          'dueDate': task.dueDate?.toIso8601String(),
+        })
+        .toList();
+    
+    return {
+      'userStats': userStats,
+      'recentTasks': recentTasks,
+    };
   }
 
   void _scrollToBottom() {

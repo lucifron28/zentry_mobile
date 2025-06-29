@@ -37,8 +37,12 @@ class AIService {
   static bool get isConfigured => EnvConfig.isGeminiConfigured;
   
   /// Send a message to the Gemini assistant
-  static Future<String> sendMessage(String message, {
+  static Future<String> sendMessage(
+    String message, {
     List<Map<String, String>>? conversationHistory,
+    String? currentScreen,
+    Map<String, dynamic>? userStats,
+    List<Map<String, dynamic>>? recentTasks,
   }) async {
     // Debug logging
     if (EnvConfig.debugMode) {
@@ -57,26 +61,54 @@ class AIService {
       await Future.delayed(const Duration(seconds: 1));
       return _generatePlaceholderResponse(message);
     }
+
+    // Check for quick responses first
+    final quickResponse = _getQuickResponse(message);
+    if (quickResponse != null) {
+      return quickResponse;
+    }
     
     try {
       if (EnvConfig.debugMode) {
         print('🚀 Making Gemini API request...');
       }
       
-      // Prepare conversation content for Gemini
-      String fullPrompt = _getSystemPrompt();
+      // Build comprehensive prompt with context
+      String systemPrompt = _getSystemPrompt();
+      String contextualPrompt = _getContextualPrompt(
+        recentTasks: recentTasks,
+        userStats: userStats,
+        currentScreen: currentScreen,
+      );
+      
+      // Detect scenario and add specialized guidance
+      String scenarioPrompt = '';
+      if (message.toLowerCase().contains(RegExp(r'overwhelm|too much|stressed|busy'))) {
+        scenarioPrompt = _getScenarioPrompt('overwhelmed');
+      } else if (message.toLowerCase().contains(RegExp(r'procrastinat|delay|avoid|put off'))) {
+        scenarioPrompt = _getScenarioPrompt('procrastination');
+      } else if (message.toLowerCase().contains(RegExp(r'plan|organiz|schedul|priorit'))) {
+        scenarioPrompt = _getScenarioPrompt('planning');
+      } else if (message.toLowerCase().contains(RegExp(r'motivat|encourag|inspir|give up'))) {
+        scenarioPrompt = _getScenarioPrompt('motivation');
+      } else if (message.toLowerCase().contains(RegExp(r'habit|routine|consist|daily'))) {
+        scenarioPrompt = _getScenarioPrompt('habits');
+      }
+      
+      // Combine all prompts
+      String fullPrompt = systemPrompt + contextualPrompt + scenarioPrompt;
       
       // Add conversation history if provided
       if (conversationHistory != null && conversationHistory.isNotEmpty) {
-        fullPrompt += '\n\n--- Previous conversation ---\n';
-        for (final entry in conversationHistory) {
-          fullPrompt += '${entry['role'] == 'user' ? 'User' : 'Assistant'}: ${entry['content']}\n';
+        fullPrompt += '\n\n--- CONVERSATION HISTORY ---\n';
+        for (final entry in conversationHistory.take(10)) {
+          String role = entry['role'] == 'user' ? 'Ron' : 'Zenturion';
+          fullPrompt += '$role: ${entry['content']}\n';
         }
-        fullPrompt += '--- End conversation ---\n\n';
       }
       
       // Add the current user message
-      fullPrompt += 'User: $message\n\nAssistant:';
+      fullPrompt += '\n--- CURRENT MESSAGE ---\nRon: $message\n\nZenturion: ';
       
       final requestBody = {
         'contents': [
@@ -176,48 +208,246 @@ class AIService {
   }
   
   static String _getSystemPrompt() {
-    return '''You are Zenturion, an AI productivity assistant integrated into a Flutter mobile app called Zentry. You are designed to help users manage their tasks, projects, and achieve their productivity goals through gamification.
+    return '''You are Zenturion, the intelligent AI assistant for Zentry Mobile - a gamified productivity and task management application. You help users maximize their productivity while making work fun and engaging.
 
-CONTEXT: Users interact with you through a mobile chat interface. Keep responses concise, helpful, and engaging.
+## ABOUT ZENTRY MOBILE:
 
-KEY FEATURES YOU CAN HELP WITH:
-• Task management and prioritization
-• Project organization and planning  
-• Achievement tracking and motivation
-• Productivity tips and insights
-• Goal setting and progress monitoring
-• Time management strategies
-• Habit formation and maintenance
+**Core Features:**
+- Task Management: Create, organize, and complete tasks with priorities (High, Medium, Low)
+- Project Management: Organize tasks into projects with progress tracking
+- Gamification System: Earn XP points, level up, and unlock achievements
+- Achievement System: Complete challenges to earn badges and rewards
+- Streak Tracking: Maintain daily productivity streaks
+- Progress Analytics: Track productivity metrics and patterns
 
-PERSONALITY: Be encouraging, supportive, and motivational. Use a friendly but professional tone. Celebrate user achievements and provide actionable advice.
+**User Profile:**
+- User Name: Ron Vincent Cada
+- Current Level: Dynamically tracked based on XP
+- XP System: Points earned for completing tasks and achieving milestones
+- Streaks: Daily task completion tracking
 
-RESPONSE GUIDELINES:
-• Keep responses under 200 words for mobile readability
-• Use bullet points or numbered lists when appropriate
-• Provide specific, actionable advice
-• Ask follow-up questions to better understand user needs
-• Reference gamification elements (XP, achievements, levels) when relevant
-• Be empathetic and understanding of productivity challenges
+**App Sections:**
+1. Dashboard: Overview of tasks, projects, achievements, and progress
+2. Tasks: Full task management with filtering and organization
+3. Projects: Group related tasks and track project progress  
+4. Achievements: Badge system with various categories
+5. Profile: User stats, level progression, and settings
+6. AI Assistant (You): Productivity coaching and app guidance
 
-Remember: You're helping users build better productivity habits through the Zentry app's gamified system.''';
+## YOUR ROLE AS ZENTURION:
+
+**Primary Functions:**
+✅ Productivity coaching and motivation
+✅ Task organization and prioritization advice
+✅ Goal setting and achievement strategies
+✅ Time management tips and techniques
+✅ App feature explanations and tutorials
+✅ Progress analysis and insights
+✅ Gamification encouragement and celebration
+✅ Habit formation guidance
+
+**What You Should Help With:**
+- Breaking down large projects into manageable tasks
+- Suggesting task priorities based on deadlines and importance
+- Recommending productivity techniques (Pomodoro, time blocking, etc.)
+- Celebrating user achievements and milestones
+- Providing motivation during productivity slumps
+- Explaining how to use Zentry features effectively
+- Analyzing productivity patterns and suggesting improvements
+- Setting realistic goals and timelines
+- Building sustainable productivity habits
+
+**What You Should NOT Do:**
+❌ Provide advice unrelated to productivity or the app
+❌ Discuss topics outside of task management and productivity
+❌ Give medical, legal, or financial advice
+❌ Share personal information about other users
+❌ Provide technical support for device/OS issues unrelated to the app
+❌ Engage in controversial topics or debates
+❌ Generate inappropriate or harmful content
+
+## RESPONSE STYLE:
+
+**Tone:** Encouraging, professional, and gamification-friendly
+**Length:** Concise but comprehensive (aim for 2-4 sentences for simple questions, longer for complex advice)
+**Personality:** Enthusiastic about productivity, supportive, and slightly playful to match the gamified nature
+**Language:** Clear, actionable, and motivating
+
+**Key Phrases to Use:**
+- "Level up your productivity"
+- "Earn those XP points"
+- "Let's crush those goals"
+- "Achievement unlocked"
+- "Build that streak"
+- "Progress over perfection"
+
+## CONVERSATION CONTEXT:
+
+Always consider:
+- The user is Ron Vincent Cada
+- They're using a gamified productivity app
+- Focus on actionable productivity advice
+- Encourage continued app engagement
+- Celebrate progress and achievements
+- Provide specific, practical suggestions
+
+## EXAMPLE RESPONSES:
+
+User: "I have too many tasks and don't know where to start"
+You: "Let's level up your task game, Ron! Start by using Zentry's priority system - tackle your High priority tasks first, especially those with approaching deadlines. Try the 2-minute rule: if a task takes less than 2 minutes, do it now and earn those quick XP points. For bigger tasks, break them into smaller subtasks in your projects section. You've got this! 🎯"
+
+User: "I keep procrastinating"
+You: "Procrastination is the final boss we all face! Here's your power-up strategy: Set a 15-minute timer and commit to working on just ONE task - often starting is the hardest part. Use Zentry's achievement system as motivation - each completed task gets you closer to unlocking new badges. Also, check your daily streak - maintaining it can become a powerful motivator. Remember, progress beats perfection every time! 💪"
+
+Stay focused on productivity, be encouraging, and help Ron make the most of Zentry's features!''';
   }
   
   static String _generatePlaceholderResponse(String message) {
     final lowerMessage = message.toLowerCase();
     
+    // Check for Zentry-specific quick responses first
     if (lowerMessage.contains('task') || lowerMessage.contains('todo')) {
-      return "I can help you manage your tasks! You can create new tasks, set priorities, and track your progress. Would you like me to help you create a new task or organize your existing ones?";
+      return "Ready to level up your task game, Ron! I can help you organize tasks, set priorities, and earn XP through Zentry's gamified system. To unlock my full AI coaching capabilities, make sure your Gemini API key is configured in the app settings! 🎯";
     } else if (lowerMessage.contains('project')) {
-      return "Projects are a great way to organize your work! I can help you break down large projects into manageable tasks, set deadlines, and track progress. What project are you working on?";
+      return "Projects are perfect for organizing your bigger goals! I can help you break them down into manageable tasks and track progress. Enable my full AI features to get personalized project management advice tailored to Zentry's system! 📁";
     } else if (lowerMessage.contains('achievement') || lowerMessage.contains('goal')) {
-      return "Achievements help you stay motivated! You're currently working toward several goals. Keep completing tasks and maintaining streaks to unlock new achievements and earn XP!";
+      return "Achievements are the best way to stay motivated in Zentry! I'm designed to help you unlock badges, build streaks, and celebrate your wins. Configure my AI settings to get customized achievement strategies! 🏆";
     } else if (lowerMessage.contains('help') || lowerMessage.contains('how')) {
-      return "I'm here to help you be more productive! I can assist with:\n• Creating and managing tasks\n• Organizing projects\n• Setting goals and tracking progress\n• Analyzing your productivity patterns\n• Providing motivation and tips\n\nWhat would you like help with?";
+      return "I'm Zenturion, your productivity AI coach for Zentry! I can help with task management, goal setting, time optimization, and making the most of Zentry's gamification features. Set up my Gemini API configuration to unlock advanced coaching! 🚀";
     } else if (lowerMessage.contains('motivation') || lowerMessage.contains('productive')) {
-      return "Staying motivated is key to productivity! Here are some tips:\n• Break large tasks into smaller, manageable steps\n• Celebrate small wins along the way\n• Set clear, achievable goals\n• Take regular breaks to avoid burnout\n• Track your progress to see how far you've come!";
+      return "Let's crush those productivity goals, Ron! I'm built specifically for Zentry users to provide personalized motivation and strategies. Enable my full AI capabilities through the settings to get tailored advice for your productivity journey! 💪";
     } else {
-      return "I understand you're looking for assistance with productivity. While I'm still learning about your specific needs, I'm here to help you stay organized and achieve your goals. Could you tell me more about what you'd like to accomplish?";
+      // Randomized Zentry-specific responses
+      final responses = [
+        "Hey Ron! I'm Zenturion, your productivity AI assistant. I'd love to help you level up your task management game! To unlock my full potential, make sure your Gemini API key is configured in the app settings. 🚀",
+        
+        "Ready to crush those goals, Ron? I'm here to help you maximize Zentry's features! Check your achievements screen - you might have some badges ready to claim. Configure my AI settings to get personalized productivity advice! 🎯",
+        
+        "Looking to boost your productivity streak? I can help you organize tasks, set priorities, and build better habits using Zentry's gamified system. Just set up my AI configuration and let's get started! 💪",
+        
+        "Time to level up! I'm your AI productivity coach, designed to help you make the most of Zentry's task management and achievement system. Enable my full features through the API settings! ⭐",
+        
+        "Hey there, productivity champion! I'm Zenturion, built specifically for Zentry users like you. I can help with task prioritization, goal setting, and motivation. Just configure my AI settings to unlock advanced coaching! 🏆"
+      ];
+      
+      return responses[DateTime.now().millisecond % responses.length];
     }
+  }
+
+  /// Get contextual prompt based on user's current app state
+  static String _getContextualPrompt({
+    List<Map<String, dynamic>>? recentTasks,
+    Map<String, dynamic>? userStats,
+    String? currentScreen,
+  }) {
+    String contextPrompt = '';
+    
+    // Add context based on current screen
+    if (currentScreen != null) {
+      switch (currentScreen) {
+        case 'dashboard':
+          contextPrompt += '\nCONTEXT: User is on the Dashboard. They can see their overview stats, recent tasks, and achievements progress.';
+          break;
+        case 'tasks':
+          contextPrompt += '\nCONTEXT: User is on the Tasks screen. They can create, edit, filter, and manage their tasks here.';
+          break;
+        case 'projects':
+          contextPrompt += '\nCONTEXT: User is on the Projects screen. They can organize tasks into projects and track project progress.';
+          break;
+        case 'achievements':
+          contextPrompt += '\nCONTEXT: User is on the Achievements screen. They can view earned badges, progress toward new achievements, and claim rewards.';
+          break;
+        case 'profile':
+          contextPrompt += '\nCONTEXT: User is on the Profile screen. They can view their level, XP, stats, and account settings.';
+          break;
+        case 'ai_assistant':
+          contextPrompt += '\nCONTEXT: User is chatting with Zenturion, the AI assistant.';
+          break;
+      }
+    }
+    
+    // Add context about recent activity
+    if (recentTasks != null && recentTasks.isNotEmpty) {
+      contextPrompt += '\nRECENT ACTIVITY: User has ${recentTasks.length} recent tasks. ';
+      int completedTasks = recentTasks.where((task) => task['completed'] == true).length;
+      contextPrompt += '$completedTasks completed, ${recentTasks.length - completedTasks} pending.';
+    }
+    
+    // Add context about user stats
+    if (userStats != null) {
+      contextPrompt += '\nUSER STATS: ';
+      if (userStats['level'] != null) contextPrompt += 'Level ${userStats['level']}, ';
+      if (userStats['xp'] != null) contextPrompt += '${userStats['xp']} XP, ';
+      if (userStats['streak'] != null) contextPrompt += '${userStats['streak']}-day streak, ';
+      if (userStats['completedTasks'] != null) contextPrompt += '${userStats['completedTasks']} tasks completed total.';
+    }
+    
+    return contextPrompt;
+  }
+
+  /// Get specialized prompt for specific productivity scenarios
+  static String _getScenarioPrompt(String scenario) {
+    switch (scenario.toLowerCase()) {
+      case 'overwhelmed':
+        return '''
+SCENARIO: User feels overwhelmed with tasks.
+RESPONSE FOCUS: Provide calming, actionable advice. Suggest using Zentry's priority system, breaking tasks down, and focusing on one thing at a time. Encourage using the achievement system for motivation.
+''';
+      
+      case 'procrastination':
+        return '''
+SCENARIO: User is struggling with procrastination.
+RESPONSE FOCUS: Offer practical anti-procrastination techniques. Suggest starting with 2-minute tasks for quick wins, using Zentry's streak system for accountability, and celebrating small victories through achievements.
+''';
+      
+      case 'planning':
+        return '''
+SCENARIO: User needs help with planning and organization.
+RESPONSE FOCUS: Guide them through Zentry's project and task organization features. Suggest time-blocking, priority setting, and using the app's progress tracking tools.
+''';
+      
+      case 'motivation':
+        return '''
+SCENARIO: User needs motivation and encouragement.
+RESPONSE FOCUS: Be extra encouraging and enthusiastic. Reference their progress, achievements earned, and potential future rewards. Use gamification language heavily.
+''';
+      
+      case 'habits':
+        return '''
+SCENARIO: User wants to build better productivity habits.
+RESPONSE FOCUS: Provide habit formation advice using Zentry's features. Emphasize consistency, streak tracking, and gradual improvement. Reference the achievement system as a habit reinforcement tool.
+''';
+      
+      default:
+        return '';
+    }
+  }
+
+  /// Quick responses for common Zentry app questions
+  static String? _getQuickResponse(String message) {
+    String lowerMessage = message.toLowerCase();
+    
+    if (lowerMessage.contains('how') && lowerMessage.contains('xp')) {
+      return "You earn XP in Zentry by completing tasks! High priority tasks give more XP than low priority ones. You also earn bonus XP for maintaining streaks and unlocking achievements. Keep crushing those tasks to level up! 🎯⭐";
+    }
+    
+    if (lowerMessage.contains('achievement') && lowerMessage.contains('unlock')) {
+      return "Achievements in Zentry are unlocked by completing specific challenges! Check your Achievements screen to see what badges you're close to earning. Some are for task completion milestones, others for maintaining streaks, and special ones for unique accomplishments. Each achievement comes with XP rewards too! 🏆✨";
+    }
+    
+    if (lowerMessage.contains('priority') && lowerMessage.contains('task')) {
+      return "Great question! In Zentry, set task priorities based on urgency and importance: 🔴 High Priority for urgent deadlines and critical tasks, 🟡 Medium Priority for important but not urgent items, and 🟢 Low Priority for nice-to-have tasks. High priority tasks give more XP when completed! Start with red, then yellow, then green. 📊";
+    }
+    
+    if (lowerMessage.contains('streak') || lowerMessage.contains('daily')) {
+      return "Your streak in Zentry tracks consecutive days of task completion! Even completing just one task keeps your streak alive. Longer streaks unlock special achievements and show your consistency. Don't break the chain, Ron - every day counts! 🔥📅";
+    }
+    
+    if (lowerMessage.contains('project') && (lowerMessage.contains('organize') || lowerMessage.contains('group'))) {
+      return "Projects in Zentry help you group related tasks together! Create a project, then assign tasks to it to track overall progress. Perfect for big goals like 'Launch Website' or 'Learn Spanish'. You can see project completion percentages and stay motivated by your progress! 📁📈";
+    }
+    
+    return null; // No quick response found
   }
   
   /// Get the current configuration status with details
