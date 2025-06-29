@@ -116,10 +116,10 @@ Note: Gemini offers a generous free tier, making it ideal for personal productiv
       if (EnvConfig.debugMode) {
         print('🚀 Sending message to AI: $userMessage');
         print('🔧 AI Service configured: ${AIService.isConfigured}');
-        print('🔑 API Key configured: ${EnvConfig.openAIApiKey.startsWith('sk-')}');
+        print('🔑 API Key configured: ${EnvConfig.geminiApiKey.isNotEmpty}');
       }
       
-      // Prepare conversation history for OpenAI (last 10 messages to keep context manageable)
+      // Prepare conversation history for Gemini (last 10 messages to keep context manageable)
       final conversationHistory = <Map<String, String>>[];
       final recentMessages = _messages.length > 10 
           ? _messages.sublist(_messages.length - 10)
@@ -160,8 +160,8 @@ Note: Gemini offers a generous free tier, making it ideal for personal productiv
       }
       
       String errorMessage;
-      if (e.toString().contains('Invalid OpenAI API key')) {
-        errorMessage = "🔑 I need a valid OpenAI API key to access my full capabilities. Please check your .env file configuration!";
+      if (e.toString().contains('Invalid Gemini API key') || e.toString().contains('403')) {
+        errorMessage = "🔑 I need a valid Gemini API key to access my full capabilities. Please check your .env file configuration!";
       } else if (e.toString().contains('rate limit')) {
         errorMessage = "⏰ I'm getting too many requests right now. Please wait a moment and try again!";
       } else if (e.toString().contains('No internet') || e.toString().contains('SocketException')) {
