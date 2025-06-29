@@ -1,10 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/achievement.dart';
-import '../services/api_service.dart';
 
 class AchievementProvider extends ChangeNotifier {
-  final ApiService _apiService = ApiService();
-  
   List<Achievement> _achievements = [];
   List<Achievement> _filteredAchievements = [];
   AchievementFilter _currentFilter = AchievementFilter();
@@ -242,16 +239,30 @@ class AchievementProvider extends ChangeNotifier {
     _clearError();
     
     try {
-      final response = await _apiService.claimAchievement(achievementId);
+      // Mock claim achievement - just mark as earned
+      final index = _achievements.indexWhere((a) => a.id == achievementId);
       
-      if (response['success'] == true) {
-        final updatedAchievement = Achievement.fromJson(response['achievement']);
-        final index = _achievements.indexWhere((a) => a.id == achievementId);
+      if (index != -1 && _achievements[index].canClaim && !_achievements[index].earned) {
+        // Create updated achievement
+        final achievement = _achievements[index];
+        final updatedAchievement = Achievement(
+          id: achievement.id,
+          name: achievement.name,
+          description: achievement.description,
+          emoji: achievement.emoji,
+          category: achievement.category,
+          experienceReward: achievement.experienceReward,
+          earned: true,
+          earnedAt: DateTime.now(),
+          requirementValue: achievement.requirementValue,
+          currentProgress: achievement.currentProgress,
+          canClaim: false,
+          requirementType: achievement.requirementType,
+          metadata: achievement.metadata,
+        );
         
-        if (index != -1) {
-          _achievements[index] = updatedAchievement;
-          _applyFilter();
-        }
+        _achievements[index] = updatedAchievement;
+        _applyFilter();
         
         // Update stats
         await loadStats();
@@ -259,7 +270,7 @@ class AchievementProvider extends ChangeNotifier {
         _setLoading(false);
         return true;
       } else {
-        _error = response['message'] ?? 'Failed to claim achievement';
+        _error = 'Achievement cannot be claimed';
         _setLoading(false);
         return false;
       }
