@@ -152,6 +152,7 @@ class ProjectCard extends StatelessWidget {
                   children: [
                     // Tasks count
                     Flexible(
+                      flex: 2,
                       child: _buildStatChip(
                         icon: Icons.task_alt,
                         label: '${project.taskIds.length} tasks',
@@ -162,6 +163,7 @@ class ProjectCard extends StatelessWidget {
                     
                     // Status
                     Flexible(
+                      flex: 2,
                       child: _buildStatChip(
                         icon: _getStatusIcon(project.status),
                         label: project.status.toUpperCase(),
@@ -169,11 +171,12 @@ class ProjectCard extends StatelessWidget {
                       ),
                     ),
                     
-                    const Spacer(),
+                    const SizedBox(width: AppSizes.paddingXs),
                     
                     // Due date (if exists)
                     if (project.dueDate != null) ...[
                       Flexible(
+                        flex: 3,
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -231,12 +234,16 @@ class ProjectCard extends StatelessWidget {
             color: color,
           ),
           const SizedBox(width: 3), // Reduced spacing
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 9, // Smaller font
-              fontWeight: FontWeight.w600,
+          Flexible(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 9, // Smaller font
+                fontWeight: FontWeight.w600,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
         ],
