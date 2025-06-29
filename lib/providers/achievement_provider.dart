@@ -60,33 +60,176 @@ class AchievementProvider extends ChangeNotifier {
     _clearError();
     
     try {
-      final response = await _apiService.getAchievements();
-      
-      if (response['success'] == true) {
-        _achievements = (response['achievements'] as List)
-            .map((achievementData) => Achievement.fromJson(achievementData))
-            .toList();
-        
-        _applyFilter();
-        _setLoading(false);
-      } else {
-        _error = response['message'] ?? 'Failed to load achievements';
-        _setLoading(false);
-      }
+      // Initialize mock achievements for demo
+      _achievements = _createMockAchievements();
+      _applyFilter();
+      _setLoading(false);
     } catch (e) {
       _error = 'Failed to load achievements: $e';
       _setLoading(false);
     }
   }
 
+  List<Achievement> _createMockAchievements() {
+    return [
+      Achievement(
+        id: 1,
+        name: 'First Steps',
+        description: 'Complete your first task',
+        emoji: '🎯',
+        category: 'task',
+        experienceReward: 50,
+        earned: true,
+        earnedAt: DateTime.now().subtract(const Duration(days: 10)),
+        requirementValue: 1,
+        currentProgress: 1,
+        canClaim: false,
+        requirementType: 'tasks_completed',
+      ),
+      Achievement(
+        id: 2,
+        name: 'Task Master',
+        description: 'Complete 10 tasks',
+        emoji: '🎪',
+        category: 'task',
+        experienceReward: 100,
+        earned: true,
+        earnedAt: DateTime.now().subtract(const Duration(days: 5)),
+        requirementValue: 10,
+        currentProgress: 10,
+        canClaim: false,
+        requirementType: 'tasks_completed',
+      ),
+      Achievement(
+        id: 3,
+        name: 'Productivity Pro',
+        description: 'Complete 50 tasks',
+        emoji: '⚡',
+        category: 'task',
+        experienceReward: 250,
+        earned: false,
+        requirementValue: 50,
+        currentProgress: 23,
+        canClaim: false,
+        requirementType: 'tasks_completed',
+      ),
+      Achievement(
+        id: 4,
+        name: 'Week Warrior',
+        description: 'Maintain a 7-day streak',
+        emoji: '🔥',
+        category: 'streak',
+        experienceReward: 150,
+        earned: true,
+        earnedAt: DateTime.now().subtract(const Duration(days: 1)),
+        requirementValue: 7,
+        currentProgress: 7,
+        canClaim: false,
+        requirementType: 'streak_days',
+      ),
+      Achievement(
+        id: 5,
+        name: 'Month Champion',
+        description: 'Maintain a 30-day streak',
+        emoji: '🏆',
+        category: 'streak',
+        experienceReward: 500,
+        earned: false,
+        requirementValue: 30,
+        currentProgress: 7,
+        canClaim: false,
+        requirementType: 'streak_days',
+      ),
+      Achievement(
+        id: 6,
+        name: 'Level Up!',
+        description: 'Reach level 5',
+        emoji: '⬆️',
+        category: 'level',
+        experienceReward: 200,
+        earned: true,
+        earnedAt: DateTime.now().subtract(const Duration(days: 20)),
+        requirementValue: 5,
+        currentProgress: 5,
+        canClaim: false,
+        requirementType: 'user_level',
+      ),
+      Achievement(
+        id: 7,
+        name: 'Double Digits',
+        description: 'Reach level 10',
+        emoji: '🔟',
+        category: 'level',
+        experienceReward: 300,
+        earned: true,
+        earnedAt: DateTime.now().subtract(const Duration(days: 8)),
+        requirementValue: 10,
+        currentProgress: 10,
+        canClaim: false,
+        requirementType: 'user_level',
+      ),
+      Achievement(
+        id: 8,
+        name: 'Project Pioneer',
+        description: 'Create your first project',
+        emoji: '📁',
+        category: 'special',
+        experienceReward: 75,
+        earned: true,
+        earnedAt: DateTime.now().subtract(const Duration(days: 30)),
+        requirementValue: 1,
+        currentProgress: 1,
+        canClaim: false,
+        requirementType: 'projects_created',
+      ),
+      Achievement(
+        id: 9,
+        name: 'Early Bird',
+        description: 'Complete a task before 8 AM',
+        emoji: '🌅',
+        category: 'special',
+        experienceReward: 100,
+        earned: false,
+        requirementValue: 1,
+        currentProgress: 0,
+        canClaim: true,
+        requirementType: 'early_tasks',
+      ),
+      Achievement(
+        id: 10,
+        name: 'Night Owl',
+        description: 'Complete a task after 10 PM',
+        emoji: '🦉',
+        category: 'special',
+        experienceReward: 100,
+        earned: false,
+        requirementValue: 1,
+        currentProgress: 0,
+        canClaim: false,
+        requirementType: 'late_tasks',
+      ),
+    ];
+  }
+
   Future<void> loadStats() async {
     try {
-      final response = await _apiService.getAchievementStats();
-      
-      if (response['success'] == true) {
-        _stats = AchievementStats.fromJson(response['stats']);
-        notifyListeners();
-      }
+      // Create mock stats based on current achievements
+      _stats = AchievementStats(
+        totalAchievements: totalAchievements,
+        earnedAchievements: earnedAchievements,
+        readyToClaim: readyToClaim,
+        totalXpFromAchievements: totalXpFromAchievements,
+        completionRate: completionRate,
+        achievementsByCategory: {
+          'task': taskBadges,
+          'streak': streakBadges,
+          'level': levelBadges,
+          'special': specialBadges,
+        },
+        recentlyEarned: _achievements.where((a) => a.earned).take(3).toList(),
+        almostComplete: _achievements.where((a) => !a.earned && (a.currentProgress ?? 0) > (a.requirementValue ?? 1) * 0.7).take(3).toList(),
+      );
+      notifyListeners();
     } catch (e) {
       if (kDebugMode) {
         print('Failed to load achievement stats: $e');
