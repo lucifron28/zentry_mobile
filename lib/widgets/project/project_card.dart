@@ -135,7 +135,7 @@ class ProjectCard extends StatelessWidget {
               ProgressBar(
                 progress: progress,
                 height: 8,
-                gradientColors: _getProjectGradient(project.color),
+                gradientColors: _getProjectGradient(project.color ?? 'purple'),
                 backgroundColor: AppColors.border,
                 showLabel: true,
                 label: 'Progress',
@@ -149,7 +149,7 @@ class ProjectCard extends StatelessWidget {
                   // Tasks count
                   _buildStatChip(
                     icon: Icons.task_alt,
-                    label: '${project.completedTasks}/${project.totalTasks}',
+                    label: '${project.taskIds.length} tasks',
                     color: AppColors.tealGradient.first,
                   ),
                   const SizedBox(width: AppSizes.paddingSm),
@@ -164,17 +164,17 @@ class ProjectCard extends StatelessWidget {
                   const Spacer(),
                   
                   // Due date (if exists)
-                  if (project.deadline != null) ...[
+                  if (project.dueDate != null) ...[
                     Icon(
                       Icons.schedule,
                       size: 16,
-                      color: _getDueDateColor(project.deadline!),
+                      color: _getDueDateColor(project.dueDate!),
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      _formatDueDate(project.deadline!),
+                      _formatDueDate(project.dueDate!),
                       style: TextStyle(
-                        color: _getDueDateColor(project.deadline!),
+                        color: _getDueDateColor(project.dueDate!),
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
