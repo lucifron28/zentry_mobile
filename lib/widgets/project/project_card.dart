@@ -395,7 +395,7 @@ class ProjectOverviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progress = project.completedTasks / project.totalTasks;
+    final progress = project.taskIds.isEmpty ? 0.0 : 0.6; // Mock progress for now
 
     return GlassCard(
       child: InkWell(
@@ -410,13 +410,12 @@ class ProjectOverviewCard extends StatelessWidget {
                 children: [
                   Container(
                     width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: _getProjectGradient(project.color),
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+                    height: 32,                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: _getProjectGradient(project.color ?? 'purple'),
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
                       borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                     ),
                     child: const Icon(
@@ -443,12 +442,12 @@ class ProjectOverviewCard extends StatelessWidget {
               ProgressBar(
                 progress: progress,
                 height: 4,
-                gradientColors: _getProjectGradient(project.color),
+                gradientColors: _getProjectGradient(project.color ?? 'purple'),
                 backgroundColor: AppColors.border,
               ),
               const SizedBox(height: AppSizes.paddingSm),
               Text(
-                '${project.completedTasks}/${project.totalTasks} tasks',
+                '${project.taskIds.length} tasks',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AppColors.textSecondary,
                 ),
