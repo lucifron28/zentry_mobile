@@ -3,39 +3,40 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'env_config.dart';
 
-/// Zenturion AI Service - OpenAI Integration with Environment Configuration
+/// Zenturion AI Service - Google Gemini Integration with Environment Configuration
 /// 
 /// SETUP INSTRUCTIONS:
-/// 1. Get your OpenAI API key from: https://platform.openai.com/api-keys
+/// 1. Get your Gemini API key from: https://makersuite.google.com/app/apikey
 /// 2. Copy .env.example to .env
-/// 3. Replace 'your_openai_api_key_here' in .env with your actual API key
-/// 4. Ensure you have credits in your OpenAI account
-/// 5. Test the integration by chatting with Zenturion
+/// 3. Replace 'your_gemini_api_key_here' in .env with your actual API key
+/// 4. Test the integration by chatting with Zenturion
 /// 
 /// FEATURES:
 /// - Environment-based configuration (.env file)
-/// - GPT-3.5-turbo for fast, cost-effective responses
+/// - Gemini 1.5 Flash for fast, accurate responses
 /// - Conversation history support (last 10 messages)
 /// - Smart error handling with fallback responses
 /// - Mobile-optimized response length (configurable via .env)
 /// 
-/// ESTIMATED COSTS:
-/// - Input: $0.0015 per 1K tokens
-/// - Output: $0.002 per 1K tokens  
-/// - Typical conversation: ~$0.001-0.005 per message
+/// ADVANTAGES OF GEMINI:
+/// - Free tier with generous limits
+/// - Fast response times
+/// - Better understanding of context
+/// - Multimodal capabilities (text, images)
+/// - Higher quality responses
 class AIService {
-  // OpenAI API base URL
-  static const String _baseUrl = 'https://api.openai.com/v1';
+  // Gemini API base URL
+  static const String _baseUrl = 'https://generativelanguage.googleapis.com/v1beta';
   
   // Configuration getters from environment
-  static String get _apiKey => EnvConfig.openAIApiKey;
-  static String get _model => EnvConfig.openAIModel;
-  static int get _maxTokens => EnvConfig.openAIMaxTokens;
-  static double get _temperature => EnvConfig.openAITemperature;
+  static String get _apiKey => EnvConfig.geminiApiKey;
+  static String get _model => EnvConfig.geminiModel;
+  static int get _maxTokens => EnvConfig.geminiMaxTokens;
+  static double get _temperature => EnvConfig.geminiTemperature;
   
-  static bool get isConfigured => EnvConfig.isOpenAIConfigured;
+  static bool get isConfigured => EnvConfig.isGeminiConfigured;
   
-  /// Send a message to the OpenAI assistant
+  /// Send a message to the Gemini assistant
   static Future<String> sendMessage(String message, {
     List<Map<String, String>>? conversationHistory,
   }) async {
@@ -44,7 +45,6 @@ class AIService {
       print('🔧 AIService.sendMessage called');
       print('🔧 isConfigured: $isConfigured');
       print('🔧 API Key length: ${_apiKey.length}');
-      print('🔧 API Key starts with sk-: ${_apiKey.startsWith('sk-')}');
       print('🔧 Model: $_model');
       print('🔧 Max tokens: $_maxTokens');
     }
@@ -60,47 +60,68 @@ class AIService {
     
     try {
       if (EnvConfig.debugMode) {
-        print('🚀 Making OpenAI API request...');
+        print('🚀 Making Gemini API request...');
       }
       
-      // Prepare conversation messages for OpenAI
-      final List<Map<String, String>> messages = [
-        {
-          'role': 'system',
-          'content': _getSystemPrompt(),
-        },
-      ];
+      // Prepare conversation content for Gemini
+      String fullPrompt = _getSystemPrompt();
       
       // Add conversation history if provided
-      if (conversationHistory != null) {
-        messages.addAll(conversationHistory);
+      if (conversationHistory != null && conversationHistory.isNotEmpty) {
+        fullPrompt += '\n\n--- Previous conversation ---\n';
+        for (final entry in conversationHistory) {
+          fullPrompt += '${entry['role'] == 'user' ? 'User' : 'Assistant'}: ${entry['content']}\n';
+        }
+        fullPrompt += '--- End conversation ---\n\n';
       }
       
       // Add the current user message
-      messages.add({
-        'role': 'user',
-        'content': message,
-      });
+      fullPrompt += 'User: $message\n\nAssistant:';
       
       final requestBody = {
-        'model': _model,
-        'messages': messages,
-        'max_tokens': _maxTokens, // From environment config
-        'temperature': _temperature, // From environment config
-        'top_p': 1.0,
-        'frequency_penalty': 0.0,
-        'presence_penalty': 0.0,
+        'contents': [
+          {
+            'parts': [
+              {
+                'text': fullPrompt,
+              }
+            ]
+          }
+        ],
+        'generationConfig': {
+          'temperature': _temperature,
+          'maxOutputTokens': _maxTokens,
+          'topP': 0.95,
+          'topK': 40,
+        },
+        'safetySettings': [
+          {
+            'category': 'HARM_CATEGORY_HARASSMENT',
+            'threshold': 'BLOCK_MEDIUM_AND_ABOVE'
+          },
+          {
+            'category': 'HARM_CATEGORY_HATE_SPEECH',
+            'threshold': 'BLOCK_MEDIUM_AND_ABOVE'
+          },
+          {
+            'category': 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+            'threshold': 'BLOCK_MEDIUM_AND_ABOVE'
+          },
+          {
+            'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
+            'threshold': 'BLOCK_MEDIUM_AND_ABOVE'
+          }
+        ]
       };
       
       if (EnvConfig.debugMode) {
         print('🔧 Request body: ${json.encode(requestBody)}');
       }
       
-      // Make API call to OpenAI
+      // Make API call to Gemini
       final response = await http.post(
-        Uri.parse('$_baseUrl/chat/completions'),
+        Uri.parse('$_baseUrl/models/$_model:generateContent?key=$_apiKey'),
         headers: {
-          'Authorization': 'Bearer $_apiKey',
           'Content-Type': 'application/json',
         },
         body: json.encode(requestBody),
@@ -115,14 +136,29 @@ class AIService {
       
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final aiResponse = data['choices'][0]['message']['content'] as String;
-        return aiResponse.trim();
-      } else if (response.statusCode == 401) {
-        throw Exception('Invalid OpenAI API key. Please check your configuration.');
+        
+        // Check if we have candidates and content
+        if (data['candidates'] != null && 
+            data['candidates'].isNotEmpty &&
+            data['candidates'][0]['content'] != null &&
+            data['candidates'][0]['content']['parts'] != null &&
+            data['candidates'][0]['content']['parts'].isNotEmpty) {
+          
+          final aiResponse = data['candidates'][0]['content']['parts'][0]['text'] as String;
+          return aiResponse.trim();
+        } else {
+          throw Exception('No valid response from Gemini API');
+        }
+      } else if (response.statusCode == 400) {
+        final errorData = json.decode(response.body);
+        final errorMessage = errorData['error']?['message'] ?? 'Invalid request';
+        throw Exception('Gemini API error: $errorMessage');
+      } else if (response.statusCode == 403) {
+        throw Exception('Invalid Gemini API key or quota exceeded. Please check your configuration.');
       } else if (response.statusCode == 429) {
-        throw Exception('OpenAI API rate limit exceeded. Please try again later.');
+        throw Exception('Gemini API rate limit exceeded. Please try again later.');
       } else if (response.statusCode == 500) {
-        throw Exception('OpenAI service is currently unavailable. Please try again later.');
+        throw Exception('Gemini service is currently unavailable. Please try again later.');
       } else {
         throw Exception('Failed to get AI response: ${response.statusCode} - ${response.body}');
       }
@@ -131,6 +167,9 @@ class AIService {
     } on http.ClientException {
       throw Exception('Network error. Please try again.');
     } catch (e) {
+      if (EnvConfig.debugMode) {
+        print('❌ AI Service error: $e');
+      }
       // Fallback to placeholder response on any error
       return _generatePlaceholderResponse(message);
     }
@@ -191,23 +230,25 @@ Remember: You're helping users build better productivity habits through the Zent
       'apiKeySet': isConfigured,
       'apiKeyPreview': isConfigured ? '${_apiKey.substring(0, 7)}...' : 'Not set',
       'envInitialized': EnvConfig.isInitialized,
+      'service': 'Google Gemini',
     };
   }
   
   /// Validate API key format (basic check)
   static bool isValidApiKeyFormat(String apiKey) {
-    return apiKey.startsWith('sk-') && apiKey.length > 20;
+    return apiKey.isNotEmpty && apiKey.length > 10;
   }
   
-  /// Get estimated cost information
-  static Map<String, String> getCostInfo() {
+  /// Get pricing and feature information
+  static Map<String, String> getServiceInfo() {
     return {
+      'service': 'Google Gemini',
       'model': _model,
       'maxTokens': _maxTokens.toString(),
       'temperature': _temperature.toString(),
-      'inputCost': '\$0.0015 per 1K tokens',
-      'outputCost': '\$0.002 per 1K tokens',
-      'estimatedPerMessage': '~\$0.001-0.005',
+      'pricing': 'Free tier available',
+      'features': 'Fast, accurate, multimodal',
+      'provider': 'Google AI',
     };
   }
 }
