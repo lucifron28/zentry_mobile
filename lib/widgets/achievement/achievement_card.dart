@@ -225,16 +225,13 @@ class AchievementCard extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'earned':
-        return AppColors.earned;
-      case 'claimable':
-        return AppColors.claimable;
-      case 'locked':
-        return AppColors.locked;
-      default:
-        return AppColors.textSecondary;
+  Color _getStatusColor() {
+    if (achievement.earned) {
+      return AppColors.earned;
+    } else if (achievement.canClaim) {
+      return AppColors.claimable;
+    } else {
+      return AppColors.locked;
     }
   }
 
@@ -385,16 +382,16 @@ class AchievementBadge extends StatelessWidget {
                   strokeWidth: 3,
                   backgroundColor: Colors.transparent,
                   valueColor: AlwaysStoppedAnimation(
-                    _getGradientColors(achievement.type).first,
+                    _getGradientColors(achievement.category).first,
                   ),
                 ),
               ),
           ],
         ),
-        if (showProgress && achievement.progress != null && achievement.target != null) ...[
+        if (showProgress && achievement.currentProgress != null && achievement.requirementValue != null) ...[
           const SizedBox(height: 4),
           Text(
-            '${achievement.progress}/${achievement.target}',
+            '${achievement.currentProgress}/${achievement.requirementValue}',
             style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: size * 0.2,
