@@ -9,6 +9,7 @@ class Project {
   final DateTime? dueDate;
   final DateTime? completedAt;
   final String userId;
+  final String? teamId;
   final List<String> memberIds;
   final List<String> taskIds;
   final Map<String, dynamic>? metadata;
@@ -24,6 +25,7 @@ class Project {
     this.dueDate,
     this.completedAt,
     required this.userId,
+    this.teamId,
     this.memberIds = const [],
     this.taskIds = const [],
     this.metadata,
@@ -74,6 +76,7 @@ class Project {
           ? DateTime.parse(json['completed_at'])
           : null,
       userId: json['user_id']?.toString() ?? '',
+      teamId: json['team_id']?.toString(),
       memberIds: List<String>.from(json['member_ids'] ?? []),
       taskIds: List<String>.from(json['task_ids'] ?? []),
       metadata: json['metadata'] as Map<String, dynamic>?,
@@ -92,6 +95,7 @@ class Project {
       'due_date': dueDate?.toIso8601String(),
       'completed_at': completedAt?.toIso8601String(),
       'user_id': userId,
+      'team_id': teamId,
       'member_ids': memberIds,
       'task_ids': taskIds,
       'metadata': metadata,
@@ -109,6 +113,7 @@ class Project {
     DateTime? dueDate,
     DateTime? completedAt,
     String? userId,
+    String? teamId,
     List<String>? memberIds,
     List<String>? taskIds,
     Map<String, dynamic>? metadata,
@@ -124,6 +129,7 @@ class Project {
       dueDate: dueDate ?? this.dueDate,
       completedAt: completedAt ?? this.completedAt,
       userId: userId ?? this.userId,
+      teamId: teamId ?? this.teamId,
       memberIds: memberIds ?? this.memberIds,
       taskIds: taskIds ?? this.taskIds,
       metadata: metadata ?? this.metadata,
