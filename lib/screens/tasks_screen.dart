@@ -16,7 +16,7 @@ class _TasksScreenState extends State<TasksScreen> with TickerProviderStateMixin
   late TabController _tabController;
   
   // Mock tasks data
-  final List<Task> _mockTasks = [
+  List<Task> _mockTasks = [
     Task(
       id: '1',
       title: 'Complete Flutter Project',
@@ -305,7 +305,25 @@ class _TasksScreenState extends State<TasksScreen> with TickerProviderStateMixin
   }
 
   void _toggleTaskCompletion(Task task) {
-    // Mock toggle functionality
+    setState(() {
+      final index = _mockTasks.indexWhere((t) => t.id == task.id);
+      if (index != -1) {
+        final currentTask = _mockTasks[index];
+        final newStatus = currentTask.status == 'completed' ? 'pending' : 'completed';
+        final newCompletedAt = newStatus == 'completed' ? DateTime.now() : null;
+        
+        // Create updated task with new status using copyWith
+        final updatedTask = currentTask.copyWith(
+          status: newStatus,
+          completedAt: newCompletedAt,
+          updatedAt: DateTime.now(),
+        );
+        
+        _mockTasks[index] = updatedTask;
+      }
+    });
+    
+    // Show feedback
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -313,7 +331,8 @@ class _TasksScreenState extends State<TasksScreen> with TickerProviderStateMixin
             ? 'Task marked as incomplete' 
             : 'Task completed! +${task.xpReward} XP',
         ),
-        backgroundColor: AppColors.success,
+        backgroundColor: task.status == 'completed' ? AppColors.warning : AppColors.success,
+        duration: const Duration(seconds: 2),
       ),
     );
   }
