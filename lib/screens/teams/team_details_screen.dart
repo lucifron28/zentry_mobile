@@ -4,6 +4,7 @@ import '../../utils/constants.dart';
 import '../../widgets/common/glass_card.dart';
 import '../../providers/team_provider.dart';
 import '../../models/team.dart';
+import 'team_project_management_screen.dart';
 
 class TeamDetailsScreen extends StatefulWidget {
   final String teamId;
@@ -416,17 +417,10 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen>
             const SizedBox(width: 12),
             Expanded(
               child: _buildActionButton(
-                'Create Project',
-                Icons.add_box,
+                'Manage Projects',
+                Icons.folder_open,
                 AppColors.warning,
-                () {
-                  // TODO: Navigate to create project screen
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Project creation coming soon!'),
-                    ),
-                  );
-                },
+                () => _navigateToProjectManagement(),
               ),
             ),
           ],
@@ -764,6 +758,15 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen>
             child: const Text('Remove'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _navigateToProjectManagement() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TeamProjectManagementScreen(teamId: widget.teamId),
       ),
     );
   }
