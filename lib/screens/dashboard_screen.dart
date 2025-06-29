@@ -268,13 +268,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildStatsSection() {
-    return Consumer3<TaskProvider, AchievementProvider, ProjectProvider>(
-      builder: (context, taskProvider, achievementProvider, projectProvider, child) {
-        final completedTasks = taskProvider.tasks.where((task) => 
-          task.status == AppConstants.completedStatus).length;
-        final totalTasks = taskProvider.tasks.length;
-        final earnedAchievements = achievementProvider.achievements.where((a) => a.earned).length;
-        final activeProjects = projectProvider.projects.where((p) => p.isActive).length;
+    return Consumer4<TaskProvider, AchievementProvider, ProjectProvider, TeamProvider>(
+      builder: (context, taskProvider, achievementProvider, projectProvider, teamProvider, child) {
+        // Calculate stats using proper provider getters
+        final completedTasks = taskProvider.completedTasks;
+        final totalTasks = taskProvider.totalTasks;
+        final earnedAchievements = achievementProvider.earnedAchievements;
+        final totalAchievements = achievementProvider.totalAchievements;
+        final activeProjects = projectProvider.activeProjects;
+        final totalProjects = projectProvider.totalProjects;
+        final myTeams = teamProvider.myTeams.length;
+        
+        // Calculate completion percentage for task progress
+        final taskProgress = totalTasks > 0 ? (completedTasks / totalTasks * 100).round() : 0;
 
         return AnimationLimiter(
           child: GridView.count(
@@ -292,32 +298,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               children: [
                 StatCard(
-                  title: 'Tasks',
+                  title: 'Tasks Completed',
                   value: '$completedTasks/$totalTasks',
+                  subtitle: '$taskProgress% done',
                   icon: Icons.task_alt,
                   gradient: AppColors.tealGradient,
                   onTap: () => _navigateToScreen(1), // Navigate to tasks
                 ),
                 StatCard(
                   title: 'Achievements',
-                  value: '$earnedAchievements',
+                  value: '$earnedAchievements/$totalAchievements',
+                  subtitle: '${achievementProvider.readyToClaim} ready to claim',
                   icon: Icons.emoji_events,
                   gradient: AppColors.yellowGradient,
                   onTap: () => _navigateToScreen(3), // Navigate to achievements
                 ),
                 StatCard(
-                  title: 'Projects',
+                  title: 'Active Projects',
                   value: '$activeProjects',
+                  subtitle: '$totalProjects total projects',
                   icon: Icons.folder,
                   gradient: AppColors.purpleGradient,
                   onTap: () => _navigateToScreen(2), // Navigate to projects
                 ),
                 StatCard(
-                  title: 'Streak',
-                  value: '7 days', // Mock data
-                  icon: Icons.local_fire_department,
-                  gradient: AppColors.redGradient,
-                  onTap: () => _navigateToScreen(3), // Navigate to achievements (streak is part of achievements)
+                  title: 'My Teams',
+                  value: '$myTeams',
+                  subtitle: '${teamProvider.adminTeams.length} admin roles',
+                  icon: Icons.groups,
+                  gradient: AppColors.blueGradient,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const TeamsScreen()),
+                  ),
                 ),
               ],
             ),
@@ -384,15 +397,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       // Navigate to task details
                       _navigateToScreen(1); // Navigate to tasks screen
                     },
-                    onToggleComplete: () {
-                      taskProvider.completeTask(task.id);
+                    onToggleComplete: () async {
+                      final success = await taskProvider.completeTask(task.id);
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              success 
+                                ? 'Task completed! +${task.xpReward} XP'
+                                : 'Failed to complete task',
+                            ),
+                            backgroundColor: success ? AppColors.success : AppColors.danger,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      }
                     },
                     onEdit: () {
                       // Navigate to edit task
                       _navigateToScreen(1); // Navigate to tasks screen where editing can be done
                     },
-                    onDelete: () {
-                      taskProvider.deleteTask(task.id);
+                    onDelete: () async {
+                      final success = await taskProvider.deleteTask(task.id);
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              success 
+                                ? 'Task deleted successfully'
+                                : 'Failed to delete task',
+                            ),
+                            backgroundColor: success ? AppColors.success : AppColors.danger,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      }
                     },
                     showActions: false,
                   );
