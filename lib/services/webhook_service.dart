@@ -153,6 +153,7 @@ class WebhookService {
         },
         'user': {
           'name': 'Ron Vincent Cada',
+          'total_xp': 2950, // Updated total after badge
         },
         'timestamp': DateTime.now().toIso8601String(),
       },
@@ -337,8 +338,9 @@ class WebhookService {
       case 'task_completed':
         title = '🎯 Task Completed!';
         description = '**${payload['task']['title']}** (${payload['task']['priority']} priority)\n'
-            'Project: ${payload['task']['project']}\n'
-            'XP Earned: +${payload['task']['xp_earned']}';
+            '📁 Project: **${payload['task']['project']}**\n'
+            '⭐ XP Earned: **+${payload['task']['xp_earned']}** (Total: ${payload['user']['total_xp']})\n'
+            '👤 Completed by: **${payload['user']['name']}**';
         color = 0x00ff00; // Green
         break;
       case 'project_completed':
@@ -350,10 +352,11 @@ class WebhookService {
         color = 0xffd700; // Gold
         break;
       case 'badge_earned':
-        title = '🏅 New Badge Earned!';
-        description = '**${payload['badge']['name']}**\n'
-            '${payload['badge']['description']}\n'
-            'XP Reward: +${payload['badge']['xp_reward']}';
+        title = '🏅 New Achievement Unlocked!';
+        description = '**${payload['badge']['name']}** - ${payload['badge']['category']}\n'
+            '📝 ${payload['badge']['description']}\n'
+            '⭐ XP Reward: **+${payload['badge']['xp_reward']}**\n'
+            '🎉 Congratulations ${payload['user']['name']}!';
         color = 0xff6b35; // Orange
         break;
       case 'level_up':
@@ -401,8 +404,9 @@ class WebhookService {
       case 'task_completed':
         title = '🎯 Task Completed!';
         text = '**${payload['task']['title']}** (${payload['task']['priority']} priority)  \n'
-            'Project: ${payload['task']['project']}  \n'
-            'XP Earned: +${payload['task']['xp_earned']}';
+            '📁 **Project:** ${payload['task']['project']}  \n'
+            '⭐ **XP Earned:** +${payload['task']['xp_earned']} (Total: ${payload['user']['total_xp']})  \n'
+            '👤 **Completed by:** ${payload['user']['name']}';
         themeColor = '00FF00'; // Green
         break;
       case 'project_completed':
@@ -414,10 +418,11 @@ class WebhookService {
         themeColor = 'FFD700'; // Gold
         break;
       case 'badge_earned':
-        title = '🏅 New Badge Earned!';
-        text = '**${payload['badge']['name']}**  \n'
-            '${payload['badge']['description']}  \n'
-            'XP Reward: +${payload['badge']['xp_reward']}';
+        title = '🏅 New Achievement Unlocked!';
+        text = '**${payload['badge']['name']}** - ${payload['badge']['category']}  \n'
+            '📝 ${payload['badge']['description']}  \n'
+            '⭐ **XP Reward:** +${payload['badge']['xp_reward']}  \n'
+            '🎉 **Congratulations ${payload['user']['name']}!**';
         themeColor = 'FF6B35'; // Orange
         break;
       case 'level_up':
@@ -446,10 +451,22 @@ class WebhookService {
       'sections': [
         {
           'activityTitle': title,
-          'activitySubtitle': 'From ${payload['user']['name']}',
+          'activitySubtitle': 'Zentry Mobile App - Productivity Tracker',
           'activityImage': 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Trophy/3D/trophy_3d.png',
           'text': text,
           'markdown': true,
+        }
+      ],
+      'potentialAction': [
+        {
+          '@type': 'OpenUri',
+          'name': 'Open Zentry Mobile',
+          'targets': [
+            {
+              'os': 'default',
+              'uri': 'https://zentry-mobile.app'
+            }
+          ]
         }
       ]
     };
