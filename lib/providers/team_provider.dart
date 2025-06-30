@@ -17,8 +17,7 @@ class TeamProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
   
-  List<Team> get myTeams => _teams.where((team) => 
-      team.isMember('current_user_id')).toList(); // TODO: Replace with actual user ID
+  List<Team> get myTeams => _teams; // Show all teams for demo purposes
   
   List<Team> get adminTeams => _teams.where((team) => 
       team.isAdmin('current_user_id')).toList(); // TODO: Replace with actual user ID

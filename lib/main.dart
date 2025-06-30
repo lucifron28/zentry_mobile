@@ -105,6 +105,7 @@ class _AppInitializerState extends State<AppInitializer> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await Future.wait([
         context.read<AchievementProvider>().init(),
+        context.read<TeamProvider>().loadTeams(), // Load demo teams
         // Skip other providers for now since they don't have init() methods
         // context.read<TaskProvider>().init(),
         // context.read<ProjectProvider>().init(),
