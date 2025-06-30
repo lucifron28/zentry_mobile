@@ -592,8 +592,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 TextButton(
                   onPressed: () {
-                    // Navigate to tasks screen
-                    _navigateToScreen(1); // Tasks screen is at index 1
+                    _navigateToScreen(1);
                   },
                   child: Text(
                     'See All',
@@ -623,8 +622,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   return TaskCard(
                     task: task,
                     onTap: () {
-                      // Navigate to task details
-                      _navigateToScreen(1); // Navigate to tasks screen
+                      _navigateToScreen(1);
                     },
                     onToggleComplete: () async {
                       final success = await taskProvider.toggleTaskCompletion(task.id);
@@ -645,8 +643,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       }
                     },
                     onEdit: () {
-                      // Navigate to edit task
-                      _navigateToScreen(1); // Navigate to tasks screen where editing can be done
+                      _navigateToScreen(1);
                     },
                     onDelete: () async {
                       final success = await taskProvider.deleteTask(task.id);
@@ -698,7 +695,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 TextButton(
                   onPressed: () {
                     // Navigate to projects screen
-                    _navigateToScreen(2); // Projects screen is at index 2
+                    _navigateToScreen(2);
                   },
                   child: Text(
                     'See All',
@@ -724,7 +721,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 1,
-                  childAspectRatio: 3.2, // Reduced further to give more height
+                  childAspectRatio: 3.2,
                   mainAxisSpacing: AppSizes.paddingSm,
                 ),
                 itemCount: activeProjects.length,
@@ -734,7 +731,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     project: project,
                     onTap: () {
                       // Navigate to project details
-                      _navigateToScreen(2); // Navigate to projects screen
+                      _navigateToScreen(2);
                     },
                   );
                 },
