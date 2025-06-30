@@ -724,7 +724,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 1,
-                  childAspectRatio: 4,
+                  childAspectRatio: 3.2, // Reduced further to give more height
                   mainAxisSpacing: AppSizes.paddingSm,
                 ),
                 itemCount: activeProjects.length,
