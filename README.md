@@ -9,6 +9,8 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](build/)
 
+**🚀 [Download APK - Ready to Install!](https://github.com/lucifron28/zentry_mobile/blob/main/build/app/outputs/flutter-apk/ZentryMobile-v1.1.0-AI-Webhooks-Teams-20250630.apk)**
+
 [Features](#-features) • [Installation](#-installation) • [Screenshots](#-screenshots) • [Team Management](#-team-management) • [AI Assistant](#-ai-assistant-zenturion)
 
 </div>
@@ -21,7 +23,7 @@ Zentry Mobile is a cutting-edge productivity application that combines task mana
 
 ### ⚡ Quick Start
 
-1. **📱 Install APK**: Run `./build_zentry_release.sh` and install the generated APK
+1. **📱 Download & Install**: [Get the APK](https://github.com/lucifron28/zentry_mobile/blob/main/build/app/outputs/flutter-apk/ZentryMobile-v1.1.0-AI-Webhooks-Teams-20250630.apk) and install on your Android device
 2. **🎯 Explore Demo**: Launch the app to see 4 pre-configured demo teams
 3. **🤖 Try Zenturion**: Chat with the AI assistant (works offline in demo mode)
 4. **👥 Join Teams**: Use invite codes like `ZENTRY2024` to join demo teams
@@ -123,22 +125,18 @@ The app comes with **4 realistic demo teams** to showcase collaboration features
 
 ### Option 1: Download Pre-built APK (Recommended)
 
-**📦 Latest Release APK**: Located in `build/app/outputs/flutter-apk/` directory
-
-After building with the custom script, the APK will be named:
-```
-ZentryMobile-v1.1.0-AI-Webhooks-Teams-[DATE].apk
-```
+**📦 Latest Release APK**: [**Download ZentryMobile-v1.1.0-AI-Webhooks-Teams-20250630.apk**](https://github.com/lucifron28/zentry_mobile/blob/main/build/app/outputs/flutter-apk/ZentryMobile-v1.1.0-AI-Webhooks-Teams-20250630.apk)
 
 **Quick Install:**
+1. **📱 Direct Download**: Click the link above to download the latest APK
+2. **🔧 Enable Installation**: Go to Android Settings → Security → "Install from Unknown Sources"
+3. **📲 Install**: Open the downloaded APK file and install
+4. **🚀 Launch**: Open Zentry Mobile and start exploring!
+
+**Alternative Build Method:**
 1. Build using the included script: `./build_zentry_release.sh`
 2. Find the APK in `build/app/outputs/flutter-apk/` directory
-3. Transfer to your Android device
-4. Enable "Install from Unknown Sources" in Android settings
-5. Install the APK file
-6. Launch Zentry Mobile and enjoy!
-
-**Alternative download**: The APK is also automatically copied to your Desktop for easy access.
+3. The APK is also automatically copied to your Desktop for easy access
 
 ### Option 2: Build from Source
 
@@ -602,7 +600,7 @@ flutter analyze
 
 **Built with ❤️ by the Zentry Team**
 
-[🌟 Star on GitHub](https://github.com/your-repo) • [🐛 Report Bug](https://github.com/your-repo/issues) • [💡 Request Feature](https://github.com/your-repo/issues) • [💬 Discuss](https://github.com/your-repo/discussions)
+[📱 Download APK](https://github.com/lucifron28/zentry_mobile/blob/main/build/app/outputs/flutter-apk/ZentryMobile-v1.1.0-AI-Webhooks-Teams-20250630.apk) • [🌟 Star on GitHub](https://github.com/lucifron28/zentry_mobile) • [🐛 Report Bug](https://github.com/lucifron28/zentry_mobile/issues) • [💡 Request Feature](https://github.com/lucifron28/zentry_mobile/issues) • [💬 Discuss](https://github.com/lucifron28/zentry_mobile/discussions)
 
 ---
 

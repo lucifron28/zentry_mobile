@@ -66,7 +66,8 @@
 
 ### 📚 Documentation
 - ✅ Comprehensive README with installation guide
-- ✅ Screenshots placeholders with clear structure
+- ✅ Real screenshots showcasing app features and integrations
+- ✅ Direct APK download link for easy installation
 - ✅ API setup instructions for Gemini AI
 - ✅ Team management documentation
 - ✅ Contributing guidelines and code of conduct
@@ -93,8 +94,9 @@
 - ✅ Demo mode for API-free operation
 
 ## 📱 APK Details
-- **Name**: `ZentryMobile-v1.1.0-AI-Webhooks-Teams-[DATE].apk`
+- **Name**: `ZentryMobile-v1.1.0-AI-Webhooks-Teams-20250630.apk`
 - **Location**: `build/app/outputs/flutter-apk/`
+- **Direct Download**: [📦 Download APK](https://github.com/lucifron28/zentry_mobile/blob/main/build/app/outputs/flutter-apk/ZentryMobile-v1.1.0-AI-Webhooks-Teams-20250630.apk)
 - **Features**: Full team management, AI assistant, webhooks
 - **Mode**: AI works in demo mode without API key
 - **Size**: Optimized with --shrink flag
