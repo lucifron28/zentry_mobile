@@ -428,26 +428,28 @@ class ProjectOverviewCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppSizes.radiusMd),
         child: Padding(
-          padding: const EdgeInsets.all(AppSizes.paddingMd),
+          padding: const EdgeInsets.all(AppSizes.paddingSm), // Reduced padding
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 children: [
                   Container(
-                    width: 32,
-                    height: 32,                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: _getProjectGradient(project.color ?? 'purple'),
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: _getProjectGradient(project.color ?? 'purple'),
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
                       borderRadius: BorderRadius.circular(AppSizes.radiusSm),
                     ),
                     child: const Icon(
                       Icons.folder,
                       color: Colors.white,
-                      size: 16,
+                      size: 14,
                     ),
                   ),
                   const SizedBox(width: AppSizes.paddingSm),
@@ -464,14 +466,14 @@ class ProjectOverviewCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: AppSizes.paddingSm),
+              const SizedBox(height: AppSizes.paddingXs), // Reduced spacing
               ProgressBar(
                 progress: progress,
                 height: 4,
                 gradientColors: _getProjectGradient(project.color ?? 'purple'),
                 backgroundColor: AppColors.border,
               ),
-              const SizedBox(height: AppSizes.paddingSm),
+              const SizedBox(height: AppSizes.paddingXs), // Reduced spacing
               Text(
                 '${project.taskIds.length} tasks',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
