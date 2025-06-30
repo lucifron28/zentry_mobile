@@ -24,7 +24,7 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
   @override
   void initState() {
     super.initState();
-    _addWelcomeMessage();
+    // Start with empty chat - no demo message
   }
 
   @override
@@ -32,67 +32,6 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
     _messageController.dispose();
     _scrollController.dispose();
     super.dispose();
-  }
-
-  void _addWelcomeMessage() {
-    // Debug information
-    final debugInfo = _getDebugInfo();
-    final isConfigured = AIService.isConfigured;
-    
-    final welcomeText = isConfigured
-        ? "Hello! I'm Zenturion, your AI productivity assistant powered by Google Gemini. I'm here to help you manage tasks, organize projects, and achieve your goals through Zentry's gamified system. How can I help boost your productivity today?"
-        : "Hello! I'm Zenturion, your AI productivity assistant. I'm currently running in demo mode because the Gemini API key isn't configured properly. I can still help you with productivity tips and guidance! To unlock my full AI capabilities, please check the debug information below. How can I assist you today?";
-        
-    _messages.add(
-      ChatMessage(
-        text: welcomeText,
-        isUser: false,
-        timestamp: DateTime.now(),
-      ),
-    );
-    
-    // Add debug message if not configured or in debug mode
-    if (!isConfigured || EnvConfig.debugMode) {
-      _messages.add(
-        ChatMessage(
-          text: "🔧 DEBUG INFO:\n$debugInfo",
-          isUser: false,
-          timestamp: DateTime.now(),
-        ),
-      );
-    }
-  }
-  
-  String _getDebugInfo() {
-    final apiKey = EnvConfig.geminiApiKey;
-    final hasValidKey = apiKey.isNotEmpty && 
-                       apiKey != 'your_gemini_api_key_here';
-    
-    return """
-Environment Status:
-• Initialized: ${EnvConfig.isInitialized ? '✅' : '❌'}
-• Debug Mode: ${EnvConfig.debugMode ? '✅' : '❌'}
-
-Google Gemini Configuration:
-• API Key Present: ${hasValidKey ? '✅' : '❌'}
-• API Key Length: ${apiKey.length} characters
-• API Key Prefix: ${apiKey.length > 10 ? '${apiKey.substring(0, 10)}...' : apiKey}
-• Model: ${EnvConfig.geminiModel}
-• Max Tokens: ${EnvConfig.geminiMaxTokens}
-• Temperature: ${EnvConfig.geminiTemperature}
-
-Service Status:
-• AI Service Configured: ${AIService.isConfigured ? '✅' : '❌'}
-
-Setup Instructions (if not configured):
-1. Visit: https://makersuite.google.com/app/apikey
-2. Create or get your Gemini API key
-3. Copy .env.example to .env
-4. Replace 'your_gemini_api_key_here' with your actual key
-5. Restart the app completely (not hot reload)
-
-Note: Gemini offers a generous free tier, making it ideal for personal productivity apps.
-""";
   }
 
   void _sendMessage() async {
@@ -633,6 +572,38 @@ Note: Gemini offers a generous free tier, making it ideal for personal productiv
         ],
       ),
     );
+  }
+
+  String _getDebugInfo() {
+    final apiKey = EnvConfig.geminiApiKey;
+    final hasValidKey = apiKey.isNotEmpty && 
+                       apiKey != 'your_gemini_api_key_here';
+    
+    return """
+Environment Status:
+• Initialized: ${EnvConfig.isInitialized ? '✅' : '❌'}
+• Debug Mode: ${EnvConfig.debugMode ? '✅' : '❌'}
+
+Google Gemini Configuration:
+• API Key Present: ${hasValidKey ? '✅' : '❌'}
+• API Key Length: ${apiKey.length} characters
+• API Key Prefix: ${apiKey.length > 10 ? '${apiKey.substring(0, 10)}...' : apiKey}
+• Model: ${EnvConfig.geminiModel}
+• Max Tokens: ${EnvConfig.geminiMaxTokens}
+• Temperature: ${EnvConfig.geminiTemperature}
+
+Service Status:
+• AI Service Configured: ${AIService.isConfigured ? '✅' : '❌'}
+
+Setup Instructions (if not configured):
+1. Visit: https://makersuite.google.com/app/apikey
+2. Create or get your Gemini API key
+3. Copy .env.example to .env
+4. Replace 'your_gemini_api_key_here' with your actual key
+5. Restart the app completely (not hot reload)
+
+Note: Gemini offers a generous free tier, making it ideal for personal productivity apps.
+""";
   }
 }
 
