@@ -254,9 +254,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const Divider(color: AppColors.border),
                   _buildSettingTile(
                     icon: Icons.send,
-                    title: 'Test Webhook',
-                    subtitle: 'Send a test notification',
-                    onTap: () => _testWebhook(context),
+                    title: 'Test Discord Webhook',
+                    subtitle: 'Send demo notification to Discord',
+                    onTap: () => _testDiscordWebhook(context),
+                  ),
+                  const Divider(color: AppColors.border),
+                  _buildSettingTile(
+                    icon: Icons.groups,
+                    title: 'Test Teams Webhook',
+                    subtitle: 'Send demo notification to MS Teams',
+                    onTap: () => _testTeamsWebhook(context),
                   ),
                   const Divider(color: AppColors.border),
                   _buildSettingTile(
@@ -507,73 +514,67 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Future<void> _testWebhook(BuildContext context) async {
-    // Find the first enabled webhook to test
-    String? testEventType;
-    for (var entry in _eventEnabledState.entries) {
-      if (entry.value && (_urlControllers[entry.key]?.text.isNotEmpty ?? false)) {
-        testEventType = entry.key;
-        break;
-      }
-    }
-    
-    if (testEventType == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No active webhooks to test. Configure a webhook first.'),
-          backgroundColor: AppColors.warning,
-        ),
-      );
-      return;
-    }
-    
+  Future<void> _testDiscordWebhook(BuildContext context) async {
     try {
-      // Send a test webhook based on the event type
-      switch (testEventType) {
-        case WebhookService.eventTaskCompleted:
-          await WebhookService.sendTaskCompleted(
-            taskTitle: 'Test Task',
-            projectName: 'Test Project',
-            priority: 'High',
-            xpEarned: 50,
-            totalXp: 1000,
-          );
-          break;
-        case WebhookService.eventBadgeEarned:
-          await WebhookService.sendBadgeEarned(
-            badgeName: 'Test Badge',
-            badgeCategory: 'Achievement',
-            badgeDescription: 'This is a test badge notification',
-            xpReward: 100,
-          );
-          break;
-        case WebhookService.eventLevelUp:
-          await WebhookService.sendLevelUp(
-            newLevel: 5,
-            totalXp: 1000,
-            xpToNextLevel: 250,
-          );
-          break;
-        default:
-          await WebhookService.sendTaskCompleted(
-            taskTitle: 'Test Task',
-            projectName: 'Test Project',
-            priority: 'High',
-            xpEarned: 50,
-            totalXp: 1000,
-          );
-      }
+      // Force Discord URL and send a realistic demo notification
+      const discordUrl = 'https://discord.com/api/webhooks/1388537349004329001/K4dIFQM9rzNh3zn--SEuLrqAG9H_frhaKC5i__PUecpjfmjEdwO1zv96QKvIjBIV8d7L';
+      
+      // Temporarily override webhook URL for demo
+      await WebhookService.setWebhookUrl(WebhookService.eventTaskCompleted, discordUrl);
+      await WebhookService.setWebhookEnabled(WebhookService.eventTaskCompleted, true);
+      
+      await WebhookService.sendTaskCompleted(
+        taskTitle: 'Implement Real-time Notifications',
+        projectName: 'Zentry Mobile Development',
+        priority: 'High',
+        xpEarned: 150,
+        totalXp: 2750,
+      );
       
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Test webhook sent successfully!'),
+          content: Text('🎯 Discord demo notification sent successfully!'),
           backgroundColor: AppColors.success,
+          duration: Duration(seconds: 3),
         ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to send test webhook: $e'),
+          content: Text('❌ Failed to send Discord webhook: $e'),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+    }
+  }
+
+  Future<void> _testTeamsWebhook(BuildContext context) async {
+    try {
+      // Force Teams URL and send a realistic demo notification
+      const teamsUrl = 'https://mseufeduph.webhook.office.com/webhookb2/1d1a0208-f69a-47ed-9c1b-8c29c5fc9769@ddedb3cc-596d-482b-8e8c-6cc149a7a7b7/IncomingWebhook/09b5955c636a46688922a4e106304fd9/d8352f48-e96e-4321-800f-f998f9af400a/V21F7JNsmKeqN21d_HSU9mFN4tJ8jkpGlYB4mL892I1P01';
+      
+      // Temporarily override webhook URL for demo
+      await WebhookService.setWebhookUrl(WebhookService.eventBadgeEarned, teamsUrl);
+      await WebhookService.setWebhookEnabled(WebhookService.eventBadgeEarned, true);
+      
+      await WebhookService.sendBadgeEarned(
+        badgeName: 'Productivity Champion',
+        badgeCategory: 'Achievement',
+        badgeDescription: 'Completed 50+ tasks in the Zentry Mobile app with excellent consistency and quality! Keep up the amazing work!',
+        xpReward: 200,
+      );
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('🏅 Teams demo notification sent successfully!'),
+          backgroundColor: AppColors.success,
+          duration: Duration(seconds: 3),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ Failed to send Teams webhook: $e'),
           backgroundColor: AppColors.danger,
         ),
       );
