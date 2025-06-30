@@ -153,7 +153,7 @@ class WebhookService {
         },
         'user': {
           'name': 'Ron Vincent Cada',
-          'total_xp': 2950, // Updated total after badge
+          'total_xp': 2950,
         },
         'timestamp': DateTime.now().toIso8601String(),
       },
