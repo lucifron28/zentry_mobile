@@ -27,7 +27,7 @@ class WebhookService {
   /// Get webhook URL for a specific event
   static Future<String?> getWebhookUrl(String eventType) async {
     final prefs = await SharedPreferences.getInstance();
-    final savedUrl = prefs.getString('${_prefsPrefix}${eventType}_url');
+    final savedUrl = prefs.getString('$_prefsPrefix${eventType}_url');
     
     // Return saved URL if exists, otherwise return default Discord URL
     return savedUrl ?? defaultDiscordUrl;
@@ -37,9 +37,9 @@ class WebhookService {
   static Future<void> setWebhookUrl(String eventType, String? url) async {
     final prefs = await SharedPreferences.getInstance();
     if (url != null && url.isNotEmpty) {
-      await prefs.setString('${_prefsPrefix}${eventType}_url', url);
+      await prefs.setString('$_prefsPrefix${eventType}_url', url);
     } else {
-      await prefs.remove('${_prefsPrefix}${eventType}_url');
+      await prefs.remove('$_prefsPrefix${eventType}_url');
     }
   }
 
@@ -48,13 +48,13 @@ class WebhookService {
     final prefs = await SharedPreferences.getInstance();
     // Enable by default for task completion and badge earned events
     final defaultEnabled = eventType == eventTaskCompleted || eventType == eventBadgeEarned;
-    return prefs.getBool('${_prefsPrefix}${eventType}_enabled') ?? defaultEnabled;
+    return prefs.getBool('$_prefsPrefix${eventType}_enabled') ?? defaultEnabled;
   }
 
   /// Enable/disable webhook for a specific event
   static Future<void> setWebhookEnabled(String eventType, bool enabled) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('${_prefsPrefix}${eventType}_enabled', enabled);
+    await prefs.setBool('$_prefsPrefix${eventType}_enabled', enabled);
   }
 
   /// Send webhook notification for task completion
@@ -500,9 +500,9 @@ class WebhookService {
     // Set default URLs for all events if not already set
     final events = getAvailableEvents();
     for (final eventType in events.keys) {
-      final existingUrl = prefs.getString('${_prefsPrefix}${eventType}_url');
+      final existingUrl = prefs.getString('$_prefsPrefix${eventType}_url');
       if (existingUrl == null) {
-        await prefs.setString('${_prefsPrefix}${eventType}_url', defaultDiscordUrl);
+        await prefs.setString('$_prefsPrefix${eventType}_url', defaultDiscordUrl);
       }
     }
   }
