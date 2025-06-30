@@ -108,25 +108,44 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
       }
       
       String errorMessage;
-      if (e.toString().contains('Invalid Gemini API key') || e.toString().contains('403')) {
+      bool isConnectionIssue = false;
+      
+      if (!AIService.isConfigured) {
+        errorMessage = "🤖 I'm running in demo mode because the Gemini API key isn't configured.";
+        isConnectionIssue = false;
+      } else if (e.toString().contains('Invalid Gemini API key') || e.toString().contains('403')) {
         errorMessage = "🔑 I need a valid Gemini API key to access my full capabilities. Please check your .env file configuration!";
+        isConnectionIssue = false;
       } else if (e.toString().contains('rate limit')) {
         errorMessage = "⏰ I'm getting too many requests right now. Please wait a moment and try again!";
-      } else if (e.toString().contains('No internet') || e.toString().contains('SocketException')) {
-        errorMessage = "📶 It looks like you're offline. Please check your internet connection and try again!";
-      } else if (e.toString().contains('TimeoutException')) {
-        errorMessage = "⏱️ The request took too long. Please try again!";
+        isConnectionIssue = false;
+      } else if (e.toString().contains('No internet') || e.toString().contains('SocketException') || 
+                 e.toString().contains('Connection failed') || e.toString().contains('Network is unreachable')) {
+        errorMessage = "📶 It looks like you're offline. I'll provide demo responses until your connection is restored!";
+        isConnectionIssue = true;
+      } else if (e.toString().contains('TimeoutException') || e.toString().contains('timeout')) {
+        errorMessage = "⏱️ The connection timed out. I'll provide a demo response instead!";
+        isConnectionIssue = true;
       } else {
-        errorMessage = "🤖 I'm having a technical issue: ${e.toString()}";
+        errorMessage = "🤖 I'm having trouble connecting to my AI service. Using demo mode instead!";
+        isConnectionIssue = true;
       }
       
       // Generate fallback response
       String fallbackResponse = _generatePlaceholderResponse(userMessage);
       
+      // For connection issues, be more encouraging about demo mode
+      String responseText;
+      if (isConnectionIssue) {
+        responseText = "$errorMessage\n\n✨ **Demo Response:**\n$fallbackResponse\n\n💡 *I can still help you with productivity tips and guidance even without internet!*";
+      } else {
+        responseText = "$errorMessage\n\n$fallbackResponse";
+      }
+      
       setState(() {
         _messages.add(
           ChatMessage(
-            text: "$errorMessage\n\n$fallbackResponse",
+            text: responseText,
             isUser: false,
             timestamp: DateTime.now(),
           ),
@@ -142,15 +161,23 @@ class _AIAssistantScreenState extends State<AIAssistantScreen> {
     final lowerMessage = userMessage.toLowerCase();
     
     if (lowerMessage.contains('task') || lowerMessage.contains('todo')) {
-      return "I can help you manage your tasks! You can create new tasks, set priorities, and track your progress. Would you like me to help you create a new task or organize your existing ones?";
+      return "📝 **Task Management Tips:**\n\n• Break large tasks into smaller, actionable steps\n• Use the High/Medium/Low priority system\n• Set realistic deadlines to maintain momentum\n• Celebrate completed tasks to earn XP!\n\nYou can create new tasks using the + button on the Tasks screen. Would you like specific advice about task organization?";
     } else if (lowerMessage.contains('project')) {
-      return "Projects are a great way to organize your work! I can help you break down large projects into manageable tasks, set deadlines, and track progress. What project are you working on?";
-    } else if (lowerMessage.contains('achievement') || lowerMessage.contains('goal')) {
-      return "Achievements help you stay motivated! You're currently working toward several goals. Keep completing tasks and maintaining streaks to unlock new achievements and earn XP!";
+      return "📁 **Project Organization Strategy:**\n\n• Start with a clear project goal and scope\n• Break projects into 5-10 manageable tasks\n• Set milestone deadlines for key phases\n• Track progress to stay motivated\n\nThe Projects screen helps you organize related tasks. Each completed project gives bonus XP and achievements!";
+    } else if (lowerMessage.contains('achievement') || lowerMessage.contains('goal') || lowerMessage.contains('xp')) {
+      return "🏆 **Achievement & XP System:**\n\n• Complete tasks to earn XP (10-50 XP per task)\n• Maintain streaks for bonus rewards\n• Unlock badges for reaching milestones\n• Level up as you accumulate XP\n\nCheck the Achievements screen to see your progress and available rewards!";
+    } else if (lowerMessage.contains('productivity') || lowerMessage.contains('focus')) {
+      return "⚡ **Productivity Boost Tips:**\n\n• Use the Pomodoro Technique (25min work, 5min break)\n• Tackle your most important task first\n• Eliminate distractions during work sessions\n• Review and plan your day each morning\n\nZentry's gamification helps maintain motivation through XP and achievements!";
+    } else if (lowerMessage.contains('time') || lowerMessage.contains('schedule')) {
+      return "⏰ **Time Management Strategy:**\n\n• Time-block your calendar for deep work\n• Batch similar tasks together\n• Leave buffer time between meetings\n• Use due dates to create urgency\n\nSet realistic deadlines in Zentry to track your progress effectively!";
+    } else if (lowerMessage.contains('motivation') || lowerMessage.contains('stuck')) {
+      return "💪 **Motivation & Momentum:**\n\n• Start with the smallest possible step\n• Focus on progress, not perfection\n• Use the 2-minute rule for quick wins\n• Celebrate small victories with XP rewards\n\nZentry's achievement system is designed to keep you motivated through challenges!";
     } else if (lowerMessage.contains('help') || lowerMessage.contains('how')) {
-      return "I'm here to help you be more productive! I can assist with:\n• Creating and managing tasks\n• Organizing projects\n• Setting goals and tracking progress\n• Analyzing your productivity patterns\n• Providing motivation and tips\n\nWhat would you like help with?";
+      return "🎯 **I'm here to help you maximize productivity!**\n\n**I can assist with:**\n• Creating and organizing tasks\n• Project planning and management\n• Goal setting and achievement tracking\n• Time management strategies\n• Motivation and accountability\n• Productivity tips and techniques\n\n**Try asking me about:**\n• \"How do I organize my tasks?\"\n• \"Tips for staying motivated\"\n• \"How to manage my time better\"\n• \"Project planning strategies\"\n\nWhat specific productivity challenge can I help you with?";
+    } else if (lowerMessage.contains('hello') || lowerMessage.contains('hi') || lowerMessage.contains('hey')) {
+      return "👋 **Hello! I'm Zenturion, your AI productivity assistant!**\n\nI'm here to help you:\n• Organize your tasks and projects\n• Stay motivated with achievements\n• Develop better productivity habits\n• Reach your goals more efficiently\n\nWhether you need help with task management, time blocking, or staying motivated, I've got strategies to help you succeed!\n\nWhat productivity challenge would you like to tackle first?";
     } else {
-      return "I understand you're looking for assistance with productivity. While I'm still learning about your specific needs, I'm here to help you stay organized and achieve your goals. Could you tell me more about what you'd like to accomplish?";
+      return "🤖 **I'm here to boost your productivity!**\n\nI specialize in helping with:\n• Task and project management\n• Goal setting and achievement\n• Time management strategies\n• Motivation and accountability\n\nCould you tell me more about what specific productivity challenge you're facing? I'd love to help you find the best approach!";
     }
   }
 
